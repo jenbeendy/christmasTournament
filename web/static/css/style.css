@@ -54,9 +54,9 @@ td {
 }
 
 .flights-container {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
-    overflow-x: auto;
     padding-bottom: 20px;
 }
 
@@ -64,7 +64,6 @@ td {
     background: white;
     padding: 10px;
     border-radius: 5px;
-    min-width: 250px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 

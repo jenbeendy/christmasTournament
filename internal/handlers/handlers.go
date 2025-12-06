@@ -115,16 +115,18 @@ func ImportPlayersHandler(w http.ResponseWriter, r *http.Request) {
 		if i == 0 && (record[0] == "Name" || record[0] == "name") {
 			continue
 		}
-		if len(record) < 4 {
+		if len(record) < 3 {
 			continue // Skip invalid rows
 		}
 
 		name := record[0]
 		surname := record[1]
 		regNum := record[2]
-		handicap, err := strconv.ParseFloat(record[3], 64)
-		if err != nil {
-			continue // Skip invalid handicap
+		var handicap float64
+		if len(record) > 3 {
+			if h, err := strconv.ParseFloat(record[3], 64); err == nil {
+				handicap = h
+			}
 		}
 
 		_, err = db.DB.Exec("INSERT INTO players (name, surname, reg_num, handicap) VALUES (?, ?, ?, ?)", name, surname, regNum, handicap)
