@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Golf Tournament</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <h1>Christmas Tournament</h1>
+            <nav v-if="view !== 'scoring'">
+                <button @click="view = 'admin'" :class="{active: view === 'admin'}">Admin</button>
+                <button @click="view = 'scoring'" :class="{active: view === 'scoring'}">Scoring</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Admin View -->
+            <div v-if="view === 'admin'" class="admin-panel">
+                <div class="tabs">
+                    <button @click="adminTab = 'players'" :class="{active: adminTab === 'players'}">Players</button>
+                    <button @click="adminTab = 'flights'" :class="{active: adminTab === 'flights'}">Flights</button>
+                    <button @click="adminTab = 'results'" :class="{active: adminTab === 'results'}">Results</button>
+                    <button @click="adminTab = 'course'" :class="{active: adminTab === 'course'}">Course</button>
+                </div>
+
+                <!-- Players Tab -->
+                <div v-if="adminTab === 'players'">
+                    <h2>Players</h2>
+                    <div class="actions">
+                        <div class="player-form">
+                            <h3>{{ isEditing ? 'Edit Player' : 'Add Player' }}</h3>
+                            <input v-model="playerForm.name" placeholder="Name">
+                            <input v-model="playerForm.surname" placeholder="Surname">
+                            <input v-model="playerForm.reg_num" placeholder="Reg Num">
+                            <input v-model.number="playerForm.handicap" type="number" step="0.1" placeholder="Handicap">
+                            <button @click="savePlayer">{{ isEditing ? 'Update' : 'Add' }}</button>
+                            <button v-if="isEditing" @click="cancelEdit">Cancel</button>
+                        </div>
+                        <hr>
+                        <label>Import CSV: </label>
+                        <input type="file" @change="uploadPlayers" accept=".csv">
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Surname</th>
+                                <th>Reg Num</th>
+                                <th>Handicap</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="player in players" :key="player.id">
+                                <td>{{ player.name }}</td>
+                                <td>{{ player.surname }}</td>
+                                <td>{{ player.reg_num }}</td>
+                                <td>{{ player.handicap }}</td>
+                                <td>
+                                    <button @click="editPlayer(player)">Edit</button>
+                                    <button @click="deletePlayer(player.id)">Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Flights Tab -->
+                <div v-if="adminTab === 'flights'">
+                    <h2>Flights</h2>
+                    <div class="create-flight">
+                        <input v-model="newFlightName" placeholder="Flight Name">
+                        <button @click="createFlight">Create Flight</button>
+                    </div>
+
+                    <div class="flights-container">
+                        <div class="flight-column">
+                            <h3>Unassigned Players</h3>
+                            <div id="unassigned-players" class="player-list">
+                                <div v-for="player in unassignedPlayers" :key="player.id" :data-id="player.id"
+                                    class="player-card">
+                                    {{ player.name }} {{ player.surname }} ({{ player.handicap }})
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flight-column" v-for="flight in flights" :key="flight.id">
+                            <h3>
+                                {{ flight.name }} <small>({{ flight.token }})</small>
+                                <button @click="deleteFlight(flight.id)"
+                                    style="float: right; font-size: 0.8em; color: red;">X</button>
+                            </h3>
+                            <p><a :href="'/?view=scoring&token=' + flight.token" target="_blank">Scoring Link</a></p>
+                            <div :id="'flight-' + flight.id" class="player-list flight-list"
+                                :data-flight-id="flight.id">
+                                <div v-for="player in flight.players" :key="player.id" :data-id="player.id"
+                                    class="player-card">
+                                    {{ player.name }} {{ player.surname }} ({{ player.handicap }})
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Tab -->
+                <div v-if="adminTab === 'results'">
+                    <h2>Results</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>Gross</th>
+                                <th>Net</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(r, index) in results" :key="r.player.id">
+                                <td>{{ index + 1 }}</td>
+                                <td>{{ r.player.name }} {{ r.player.surname }}</td>
+                                <td>{{ r.gross_score }}</td>
+                                <td>{{ r.net_score }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Course Tab -->
+                <div v-if="adminTab === 'course'">
+                    <h2>Course Configuration</h2>
+                    <div class="actions">
+                        <button @click="saveCourse">Save Changes</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Hole</th>
+                                <th>Par</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="hole in course" :key="hole.hole_number">
+                                <td>{{ hole.hole_number }}</td>
+                                <td><input type="number" v-model.number="hole.par" min="3" max="6"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Scoring View -->
+            <div v-if="view === 'scoring'" class="scoring-panel">
+                <div v-if="!currentFlight">
+                    <h2>Enter Flight Token</h2>
+                    <input v-model="flightToken" placeholder="Token">
+                    <button @click="loadFlight">Load Flight</button>
+                </div>
+                <div v-else>
+                    <h2>Flight: {{ currentFlight.name }}</h2>
+                    <div style="overflow-x: auto;">
+                        <table class="scoring-table">
+                            <thead>
+                                <tr>
+                                    <th>Hole</th>
+                                    <th v-for="player in currentFlight.players" :key="player.id">
+                                        {{ getInitials(player.name, player.surname) }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="hole in 18" :key="hole">
+                                    <td>
+                                        <strong>{{ hole }}</strong><br>
+                                        <small v-if="course.length > 0">Par {{ course[hole-1].par }}</small>
+                                    </td>
+                                    <td v-for="player in currentFlight.players" :key="player.id"
+                                        @click="openPicker(player.id, hole, getScore(player.id, hole))">
+                                        <div class="score-cell" :style="getScoreStyle(getScore(player.id, hole), hole)">
+                                            {{ getScore(player.id, hole) }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Number Picker Modal -->
+                <div v-if="showPicker" class="picker-modal" @click.self="closePicker">
+                    <div class="picker-content">
+                        <h3>Select Score</h3>
+                        <div class="picker-wheel-container">
+                            <div class="picker-highlight"></div>
+                            <div class="picker-list" ref="pickerList" @scroll="onScroll">
+                                <div v-for="n in 12" :key="n-1" class="picker-item"
+                                    :class="{selected: pickerValue === (n-1)}" @click="selectOrConfirm(n-1)">
+                                    {{ n-1 }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="picker-actions">
+                            <button class="picker-btn picker-cancel" @click="closePicker">Cancel</button>
+                            <button class="picker-btn picker-confirm" @click="confirmScore">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>

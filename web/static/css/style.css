@@ -1,0 +1,271 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+nav button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+nav button.active {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.tabs {
+    margin-bottom: 20px;
+}
+
+.tabs button {
+    padding: 8px 16px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.tabs button.active {
+    background-color: #28a745;
+    color: white;
+    border: none;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+th,
+td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.flights-container {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+
+.flight-column {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    min-width: 250px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.player-list {
+    min-height: 100px;
+    border: 1px dashed #ccc;
+    padding: 5px;
+}
+
+.player-card {
+    background: #e9ecef;
+    padding: 8px;
+    margin-bottom: 5px;
+    cursor: move;
+    border-radius: 3px;
+}
+
+.score-card {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.holes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 10px;
+}
+
+.hole-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hole-input input {
+    width: 40px;
+    text-align: center;
+}
+
+/* Mobile Scoring Table */
+.scoring-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    table-layout: fixed;
+    /* Enforce column widths */
+}
+
+.scoring-table th,
+.scoring-table td {
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.scoring-table th {
+    padding: 8px;
+}
+
+.scoring-table td {
+    padding: 0;
+}
+
+/* Narrow Hole Column */
+.scoring-table th:first-child,
+.scoring-table td:first-child {
+    width: 40px;
+    /* Fixed narrow width */
+    background-color: #f8f9fa;
+}
+
+.scoring-table th {
+    background-color: #f8f9fa;
+    font-size: 0.8em;
+}
+
+.scoring-table td {
+    height: 40px;
+    cursor: pointer;
+}
+
+.score-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+/* Number Picker Modal (Slot Machine Style) */
+.picker-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    /* Bottom sheet on mobile */
+    z-index: 1000;
+}
+
+.picker-content {
+    background: white;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 10px 10px 0 0;
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    /* Remove fixed height 50vh to let content dictate, or keep it but handle container */
+}
+
+.picker-wheel-container {
+    height: 250px;
+    /* Fixed height for 5 items (5 * 50px) */
+    overflow: hidden;
+    position: relative;
+    margin: 20px 0;
+    border-top: 2px solid #ddd;
+    border-bottom: 2px solid #ddd;
+}
+
+/* Highlight the middle selection */
+.picker-highlight {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    margin-top: -25px;
+    background-color: rgba(0, 123, 255, 0.1);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.picker-list {
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    padding-top: 100px;
+    /* (250 - 50) / 2 */
+    padding-bottom: 100px;
+}
+
+/* Hide scrollbar */
+.picker-list::-webkit-scrollbar {
+    display: none;
+}
+
+.picker-list {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.picker-item {
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    scroll-snap-align: center;
+    cursor: pointer;
+    color: #ccc;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.picker-item.selected {
+    color: #007bff;
+    transform: scale(1.2);
+}
+
+.picker-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.picker-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    flex: 1;
+    margin: 0 5px;
+}
+
+.picker-cancel {
+    background: #dc3545;
+    color: white;
+}
+
+.picker-confirm {
+    background: #28a745;
+    color: white;
+}
