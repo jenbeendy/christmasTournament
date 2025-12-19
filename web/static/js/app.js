@@ -280,61 +280,63 @@ createApp({
             return (name.charAt(0) + surname.charAt(0)).toUpperCase();
         };
 
-        // Picker State
+        // Multi-Picker State
         const showPicker = ref(false);
-        const pickerPlayerId = ref(0);
         const pickerHole = ref(0);
-        const pickerValue = ref(0);
-        const pickerList = ref(null);
+        const pickerValues = ref({}); // { playerId: score }
+        const pickerRefs = {}; // { playerId: element }
 
-        const openPicker = (playerId, hole, currentValue) => {
-            pickerPlayerId.value = playerId;
+        const setPickerRef = (playerId, el) => {
+            if (el) pickerRefs[playerId] = el;
+        };
+
+        const openPicker = (hole) => {
             pickerHole.value = hole;
+            const par = getPar(hole);
 
-            if (currentValue) {
-                pickerValue.value = parseInt(currentValue);
-            } else {
-                // Default to Par if available
-                if (course.value && course.value[hole - 1]) {
-                    pickerValue.value = course.value[hole - 1].par;
-                } else {
-                    pickerValue.value = 4; // Fallback
-                }
-            }
+            // Create a new object for reactivity
+            const newValues = {};
+            currentFlight.value.players.forEach(p => {
+                const s = getScore(p.id, hole);
+                newValues[p.id] = s ? parseInt(s) : par;
+            });
+            pickerValues.value = newValues;
 
             showPicker.value = true;
 
-            // Scroll to value after render
+            // Scroll each picker to its value after full render
             nextTick(() => {
-                scrollToValue(pickerValue.value);
+                // Short timeout to ensure flex/box layout is fully computed
+                setTimeout(() => {
+                    Object.entries(pickerValues.value).forEach(([playerId, val]) => {
+                        scrollToPlayerValue(parseInt(playerId), val);
+                    });
+                }, 50);
             });
         };
 
-        const scrollToValue = (val) => {
-            pickerValue.value = val;
-            if (pickerList.value) {
-                const itemHeight = 40; // Must match CSS
-                pickerList.value.scrollTop = val * itemHeight;
+        const scrollToPlayerValue = (playerId, val) => {
+            pickerValues.value[playerId] = val;
+            const el = pickerRefs[playerId];
+            if (el) {
+                const itemHeight = 40;
+                el.scrollTop = val * itemHeight;
             }
         };
 
-        const onScroll = (e) => {
+        const onPlayerScroll = (playerId, e) => {
             const itemHeight = 40;
             const scrollTop = e.target.scrollTop;
             const index = Math.round(scrollTop / itemHeight);
-            pickerValue.value = index;
-        };
-
-        const selectOrConfirm = (val) => {
-            if (pickerValue.value === val) {
-                confirmScore();
-            } else {
-                scrollToValue(val);
-            }
+            pickerValues.value[playerId] = index;
         };
 
         const confirmScore = async () => {
-            await submitScore(pickerPlayerId.value, pickerHole.value, pickerValue.value);
+            // Submit scores for all players
+            const promises = Object.entries(pickerValues.value).map(([playerId, val]) => {
+                return submitScore(parseInt(playerId), pickerHole.value, val);
+            });
+            await Promise.all(promises);
             showPicker.value = false;
         };
 
@@ -398,13 +400,12 @@ createApp({
             submitScore,
             getInitials,
             showPicker,
-            pickerValue,
+            pickerValues,
             pickerHole,
-            pickerList,
+            setPickerRef,
             openPicker,
-            scrollToValue,
-            onScroll,
-            selectOrConfirm,
+            scrollToPlayerValue,
+            onPlayerScroll,
             confirmScore,
             closePicker,
             getDistance,

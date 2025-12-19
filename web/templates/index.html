@@ -203,7 +203,7 @@
                                 <div class="hole-par">PAR {{ getPar(hole) }}</div>
                             </div>
                             <div v-for="player in currentFlight.players" :key="player.id" class="score-cell-wrapper"
-                                @click="openPicker(player.id, hole, getScore(player.id, hole))">
+                                @click="openPicker(hole)">
                                 <div class="score-msg-box" :style="getScoreStyle(getScore(player.id, hole), hole)">
                                     <div class="dist-text">{{ getDistance(hole) }}m</div>
                                     <div class="score-val">
@@ -231,7 +231,7 @@
                                 <div class="hole-par">PAR {{ getPar(hole + 9) }}</div>
                             </div>
                             <div v-for="player in currentFlight.players" :key="player.id" class="score-cell-wrapper"
-                                @click="openPicker(player.id, hole + 9, getScore(player.id, hole + 9))">
+                                @click="openPicker(hole + 9)">
                                 <div class="score-msg-box"
                                     :style="getScoreStyle(getScore(player.id, hole + 9), hole + 9)">
                                     <div class="dist-text">{{ getDistance(hole + 9) }}m</div>
@@ -274,13 +274,19 @@
                             <span>Hole # {{ pickerHole }}</span>
                             <button @click="confirmScore" class="confirm-text">Done</button>
                         </div>
-                        <!-- Provide a more iOS-like picker aesthetic? For now keep existing or slightly refine -->
-                        <div class="picker-wheel-container">
-                            <div class="picker-highlight"></div>
-                            <div class="picker-list" ref="pickerList" @scroll="onScroll">
-                                <div v-for="n in 12" :key="n-1" class="picker-item"
-                                    :class="{selected: pickerValue === (n-1)}" @click="selectOrConfirm(n-1)">
-                                    {{ n-1 }}
+                        <div class="multi-picker-layout">
+                            <div v-for="player in currentFlight.players" :key="player.id" class="player-picker-col">
+                                <div class="player-picker-name">{{ getInitials(player.name, player.surname) }}</div>
+                                <div class="picker-wheel-container">
+                                    <div class="picker-highlight"></div>
+                                    <div class="picker-list" :ref="el => setPickerRef(player.id, el)"
+                                        @scroll="onPlayerScroll(player.id, $event)">
+                                        <div v-for="n in 12" :key="n-1" class="picker-item"
+                                            :class="{selected: pickerValues[player.id] === (n-1)}"
+                                            @click="scrollToPlayerValue(player.id, n-1)">
+                                            {{ n-1 }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
