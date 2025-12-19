@@ -237,6 +237,19 @@ createApp({
 
         // ... (inside setup)
 
+        // Distances (Mock data based on image for first 9, repeated/invented for back 9)
+        const distances = [
+            271, 316, 412, 114, 432, 178, 458, 351, 331,
+            271, 316, 412, 114, 432, 178, 458, 351, 331 // Repeat for now
+        ];
+
+        const getDistance = (hole) => {
+            return distances[hole - 1] || 0;
+        };
+
+
+        // ... (inside setup)
+
         watch(adminTab, (newVal) => {
             if (newVal === 'flights') {
                 // Fetch flights again to be sure we have latest data and then setup DnD
@@ -300,13 +313,13 @@ createApp({
         const scrollToValue = (val) => {
             pickerValue.value = val;
             if (pickerList.value) {
-                const itemHeight = 50; // Must match CSS
+                const itemHeight = 40; // Must match CSS
                 pickerList.value.scrollTop = val * itemHeight;
             }
         };
 
         const onScroll = (e) => {
-            const itemHeight = 50;
+            const itemHeight = 40;
             const scrollTop = e.target.scrollTop;
             const index = Math.round(scrollTop / itemHeight);
             pickerValue.value = index;
@@ -325,23 +338,17 @@ createApp({
             showPicker.value = false;
         };
 
-        const getScoreStyle = (score, hole) => {
-            if (!score) return {};
-            if (!course.value || !course.value[hole - 1]) return {};
+        const getPar = (hole) => {
+            return (course.value && course.value[hole - 1]) ? course.value[hole - 1].par : 4;
+        };
 
-            const par = course.value[hole - 1].par;
-            const diff = score - par;
-
-            let bg = '';
-            if (diff === 0) bg = '#FCF6A1'; // Par
-            else if (diff === 1) bg = '#D3D1EB'; // Bogey
-            else if (diff === 2) bg = '#BBB0EB'; // Double Bogey
-            else if (diff === 3) bg = '#9A78DB'; // Triple Bogey
-            else if (diff >= 4) bg = '#8F4CBF'; // +4 or worse
-            else if (diff === -1) bg = '#F5C5C4'; // Birdie
-            else if (diff <= -2) bg = '#F59391'; // Eagle or better
-
-            return { backgroundColor: bg };
+        const getPlayerTotal = (playerId, startHole, endHole) => {
+            let total = 0;
+            for (let h = startHole; h <= endHole; h++) {
+                const s = scores.value[`${playerId}-${h}`];
+                if (s) total += parseInt(s);
+            }
+            return total;
         };
 
         const closePicker = () => {
@@ -381,8 +388,10 @@ createApp({
             onScroll,
             selectOrConfirm,
             confirmScore,
-            getScoreStyle,
-            closePicker
+            closePicker,
+            getDistance,
+            getPar,
+            getPlayerTotal
         };
     }
 }).mount('#app');

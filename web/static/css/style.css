@@ -1,17 +1,35 @@
 body {
-    font-family: sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 0;
     background-color: #f4f4f4;
 }
 
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+/* Global / Admin Styles need padding, let's wrap admin in a container or handle it */
+/* Admin View container */
+.admin-panel {
+    padding: 20px;
 }
 
+header h1 {
+    margin: 0;
+    padding: 20px;
+    background: white;
+}
+
+/* Only show h1 on admin view? The new scoring view has its own header. */
+/* We can hide the main <header> in scoring view via v-if in HTML, but I already did v-if="view !== 'scoring'" on nav. 
+   The h1 "Christmas Tournament" is outside that v-if. I should probably move it or hide it for scoring view.
+   For now, I'll assume the user is okay with the h1 being there or I can target it.
+   Actually, the HTML structure has:
+   <header>
+      <h1>...</h1>
+      <nav>...</nav>
+   </header>
+   I should hide this global header in scoring view via CSS or HTML. I'll add a class to body or just use the View structure. 
+*/
+
+/* Admin Styles */
 nav button {
     padding: 10px 20px;
     margin-left: 10px;
@@ -81,82 +99,249 @@ td {
     border-radius: 3px;
 }
 
-.score-card {
-    background: white;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+/* SCORING VIEW STYLES */
+
+.flight-entry {
+    padding: 20px;
 }
 
-.holes {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: 10px;
-}
-
-.hole-input {
+.scoring-view {
+    background-color: #fff;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
+}
+
+/* App Header */
+.app-header {
+    background-color: #3578A9;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    font-size: 1.1em;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-.hole-input input {
-    width: 40px;
-    text-align: center;
-}
-
-/* Mobile Scoring Table */
-.scoring-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    table-layout: fixed;
-    /* Enforce column widths */
-}
-
-.scoring-table th,
-.scoring-table td {
-    border: 1px solid #ddd;
-    text-align: center;
-}
-
-.scoring-table th {
-    padding: 8px;
-}
-
-.scoring-table td {
-    padding: 0;
-}
-
-/* Narrow Hole Column */
-.scoring-table th:first-child,
-.scoring-table td:first-child {
-    width: 40px;
-    /* Fixed narrow width */
-    background-color: #f8f9fa;
-}
-
-.scoring-table th {
-    background-color: #f8f9fa;
-    font-size: 0.8em;
-}
-
-.scoring-table td {
-    height: 40px;
+.nav-left,
+.nav-right {
+    display: flex;
+    align-items: center;
     cursor: pointer;
 }
 
-.score-cell {
+.icon-back {
+    font-size: 1.5em;
+    margin-right: 5px;
+    font-weight: 300;
+    /* thinner chevron */
+}
+
+.nav-title {
+    font-weight: 500;
+}
+
+.icon-group span {
+    margin-left: 20px;
+    font-size: 1.3em;
+}
+
+/* Player Header */
+.player-header-container {
+    display: flex;
+    position: sticky;
+    top: 55px;
+    /* app-header height approx */
+    background: white;
+    z-index: 90;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 0;
+}
+
+.hole-header-cell {
+    width: 50px;
+    min-width: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
-    font-weight: bold;
-    font-size: 1.2em;
+    color: #999;
+    font-size: 0.7em;
+    text-align: center;
+    padding: 10px 0;
+    line-height: 1.2;
 }
 
-/* Number Picker Modal (Slot Machine Style) */
+.player-header-row {
+    display: flex;
+    flex: 1;
+    justify-content: space-around;
+}
+
+.player-header-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    padding-top: 10px;
+}
+
+.avatar-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #3578A9;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+    margin-bottom: 4px;
+    font-size: 0.9em;
+}
+
+.player-header-card:nth-child(2) .avatar-circle {
+    background-color: #5C9BD5;
+}
+
+.player-header-card:nth-child(3) .avatar-circle {
+    background-color: #4472C4;
+}
+
+.player-header-card:nth-child(4) .avatar-circle {
+    background-color: #2F5597;
+}
+
+.player-name {
+    font-weight: bold;
+    font-size: 0.85em;
+    color: #000;
+    margin-bottom: 2px;
+}
+
+.player-hcp {
+    font-size: 0.65em;
+    color: #999;
+    margin-bottom: 6px;
+}
+
+.active-indicator {
+    height: 4px;
+    width: 70%;
+    background-color: #FFEB3B;
+    margin-top: auto;
+    border-radius: 2px 2px 0 0;
+}
+
+/* Scoring Grid */
+.scoring-grid {
+    padding-bottom: 80px;
+    /* Space for summary/footer */
+}
+
+.hole-row {
+    display: flex;
+    min-height: 55px;
+    padding: 4px 0;
+}
+
+.hole-info-cell {
+    width: 50px;
+    min-width: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.hole-number {
+    font-size: 1.3em;
+    color: #333;
+    font-weight: 300;
+}
+
+.hole-par {
+    font-size: 0.6em;
+    color: #999;
+    text-transform: uppercase;
+    margin-top: -2px;
+}
+
+.score-cell-wrapper {
+    flex: 1;
+    padding: 2px 4px;
+    /* Tight padding */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.score-msg-box {
+    background-color: #E6E6E6;
+    /* Light gray from image */
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    position: relative;
+    min-height: 45px;
+}
+
+.dist-text {
+    font-size: 0.65em;
+    color: #666;
+    font-weight: bold;
+    position: absolute;
+    top: 5px;
+    left: 6px;
+}
+
+.score-val {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: #000;
+    font-size: 1.4em;
+}
+
+/* Summary Row styling */
+.summary-row {
+    margin-top: 8px;
+    background-color: #f9f9f9;
+    min-height: 45px !important;
+    padding: 0 !important;
+}
+
+.total-row {
+    margin-top: 12px;
+    background-color: #eee;
+    border-top: 2px solid #3578A9;
+    min-height: 45px !important;
+    padding: 0 !important;
+}
+
+.summary-row .hole-info-cell {
+    font-size: 0.65em;
+    color: #333;
+    font-weight: bold;
+    line-height: 1.1;
+}
+
+.summary-cell {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #333;
+}
+
+/* Picker */
 .picker-modal {
     position: fixed;
     top: 0;
@@ -167,41 +352,65 @@ td {
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    /* Bottom sheet on mobile */
     z-index: 1000;
 }
 
 .picker-content {
     background: white;
     width: 100%;
-    max-width: 400px;
-    border-radius: 10px 10px 0 0;
-    padding: 20px;
-    text-align: center;
+    max-width: 500px;
+    /* Tablet limit */
+    border-radius: 12px 12px 0 0;
     display: flex;
     flex-direction: column;
-    /* Remove fixed height 50vh to let content dictate, or keep it but handle container */
+    overflow: hidden;
+}
+
+.picker-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #ddd;
+    background: #f8f8f8;
+    align-items: center;
+}
+
+.picker-header button {
+    border: none;
+    background: none;
+    color: #007aff;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: 400;
+}
+
+.picker-header .confirm-text {
+    font-weight: 600;
+}
+
+.picker-header span {
+    font-weight: 600;
+    font-size: 1.1em;
 }
 
 .picker-wheel-container {
-    height: 250px;
-    /* Fixed height for 5 items (5 * 50px) */
+    height: 200px;
     overflow: hidden;
     position: relative;
-    margin: 20px 0;
-    border-top: 2px solid #ddd;
-    border-bottom: 2px solid #ddd;
+    background: white;
 }
 
-/* Highlight the middle selection */
 .picker-highlight {
     position: absolute;
     top: 50%;
     left: 0;
     width: 100%;
-    height: 50px;
-    margin-top: -25px;
-    background-color: rgba(0, 123, 255, 0.1);
+    height: 40px;
+    margin-top: -20px;
+    background-color: rgba(0, 0, 0, 0.05);
+    /* very subtle */
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
     pointer-events: none;
     z-index: 1;
 }
@@ -210,12 +419,11 @@ td {
     height: 100%;
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
-    padding-top: 100px;
-    /* (250 - 50) / 2 */
-    padding-bottom: 100px;
+    padding-top: 80px;
+    /* (200 - 40) / 2 */
+    padding-bottom: 80px;
 }
 
-/* Hide scrollbar */
 .picker-list::-webkit-scrollbar {
     display: none;
 }
@@ -226,45 +434,21 @@ td {
 }
 
 .picker-item {
-    height: 50px;
+    height: 40px;
+    /* Matching highlight */
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 1.5em;
-    font-weight: bold;
+    font-weight: 400;
     scroll-snap-align: center;
     cursor: pointer;
     color: #ccc;
-    transition: color 0.2s, transform 0.2s;
+    transition: all 0.2s;
 }
 
 .picker-item.selected {
-    color: #007bff;
-    transform: scale(1.2);
-}
-
-.picker-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-}
-
-.picker-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    font-size: 1em;
-    cursor: pointer;
-    flex: 1;
-    margin: 0 5px;
-}
-
-.picker-cancel {
-    background: #dc3545;
-    color: white;
-}
-
-.picker-confirm {
-    background: #28a745;
-    color: white;
+    color: #000;
+    font-weight: 500;
+    transform: scale(1.1);
 }

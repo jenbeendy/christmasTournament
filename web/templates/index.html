@@ -157,45 +157,123 @@
 
             <!-- Scoring View -->
             <div v-if="view === 'scoring'" class="scoring-panel">
-                <div v-if="!currentFlight">
+                <div v-if="!currentFlight" class="flight-entry">
                     <h2>Enter Flight Token</h2>
                     <input v-model="flightToken" placeholder="Token">
                     <button @click="loadFlight">Load Flight</button>
                 </div>
-                <div v-else>
-                    <h2>Flight: {{ currentFlight.name }}</h2>
-                    <div style="overflow-x: auto;">
-                        <table class="scoring-table">
-                            <thead>
-                                <tr>
-                                    <th>Hole</th>
-                                    <th v-for="player in currentFlight.players" :key="player.id">
-                                        {{ getInitials(player.name, player.surname) }}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="hole in 18" :key="hole">
-                                    <td>
-                                        <strong>{{ hole }}</strong><br>
-                                        <small v-if="course.length > 0">Par {{ course[hole-1].par }}</small>
-                                    </td>
-                                    <td v-for="player in currentFlight.players" :key="player.id"
-                                        @click="openPicker(player.id, hole, getScore(player.id, hole))">
-                                        <div class="score-cell" :style="getScoreStyle(getScore(player.id, hole), hole)">
-                                            {{ getScore(player.id, hole) }}
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div v-else class="scoring-view">
+                    <!-- App Header -->
+                    <header class="app-header">
+                        <div class="nav-left" @click="view = 'admin'">
+                            <span class="icon-back">&lt;</span> Turnaj
+                        </div>
+                        <div class="nav-title">
+                            Flight {{ currentFlight.id }} / 12
+                        </div>
+                        <div class="nav-right">
+                            <div class="icon-group">
+                                <span>&#128202;</span>
+                                <span>&#8942;</span>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!-- Player Header (Sticky) -->
+                    <div class="player-header-container">
+                        <div class="hole-header-cell">
+                            <span class="start-label">START<br>10:00</span>
+                        </div>
+                        <div class="player-header-row">
+                            <div v-for="player in currentFlight.players" :key="player.id" class="player-header-card">
+                                <div class="avatar-circle">{{ getInitials(player.name, player.surname) }}</div>
+                                <div class="player-name">{{ player.name }}</div>
+                                <div class="player-hcp">HCP: {{ player.handicap }}</div>
+                                <div class="active-indicator"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scoring Grid -->
+                    <div class="scoring-grid">
+                        <!-- Holes 1-9 -->
+                        <div v-for="hole in 9" :key="hole" class="hole-row">
+                            <div class="hole-info-cell">
+                                <div class="hole-number"># {{ hole }}</div>
+                                <div class="hole-par">PAR {{ getPar(hole) }}</div>
+                            </div>
+                            <div v-for="player in currentFlight.players" :key="player.id" class="score-cell-wrapper"
+                                @click="openPicker(player.id, hole, getScore(player.id, hole))">
+                                <div class="score-msg-box">
+                                    <div class="dist-text">{{ getDistance(hole) }}m</div>
+                                    <div class="score-val">
+                                        {{ getScore(player.id, hole) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary 1-9 -->
+                        <div class="hole-row summary-row">
+                            <div class="hole-info-cell">
+                                Rány<br>1-9
+                            </div>
+                            <div v-for="player in currentFlight.players" :key="player.id"
+                                class="score-cell-wrapper summary-cell">
+                                {{ getPlayerTotal(player.id, 1, 9) }}
+                            </div>
+                        </div>
+
+                        <!-- Holes 10-18 -->
+                        <div v-for="hole in 9" :key="hole + 9" class="hole-row">
+                            <div class="hole-info-cell">
+                                <div class="hole-number"># {{ hole + 9 }}</div>
+                                <div class="hole-par">PAR {{ getPar(hole + 9) }}</div>
+                            </div>
+                            <div v-for="player in currentFlight.players" :key="player.id" class="score-cell-wrapper"
+                                @click="openPicker(player.id, hole + 9, getScore(player.id, hole + 9))">
+                                <div class="score-msg-box">
+                                    <div class="dist-text">{{ getDistance(hole + 9) }}m</div>
+                                    <div class="score-val">
+                                        {{ getScore(player.id, hole + 9) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary 10-18 -->
+                        <div class="hole-row summary-row">
+                            <div class="hole-info-cell">
+                                Rány<br>10-18
+                            </div>
+                            <div v-for="player in currentFlight.players" :key="player.id"
+                                class="score-cell-wrapper summary-cell">
+                                {{ getPlayerTotal(player.id, 10, 18) }}
+                            </div>
+                        </div>
+
+                        <!-- Total 1-18 -->
+                        <div class="hole-row summary-row total-row">
+                            <div class="hole-info-cell">
+                                Celkem<br>1-18
+                            </div>
+                            <div v-for="player in currentFlight.players" :key="player.id"
+                                class="score-cell-wrapper summary-cell">
+                                {{ getPlayerTotal(player.id, 1, 18) }}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Number Picker Modal -->
                 <div v-if="showPicker" class="picker-modal" @click.self="closePicker">
                     <div class="picker-content">
-                        <h3>Select Score</h3>
+                        <div class="picker-header">
+                            <button @click="closePicker">Cancel</button>
+                            <span>Hole {{ pickerHole }}</span>
+                            <button @click="confirmScore" class="confirm-text">Done</button>
+                        </div>
+                        <!-- Provide a more iOS-like picker aesthetic? For now keep existing or slightly refine -->
                         <div class="picker-wheel-container">
                             <div class="picker-highlight"></div>
                             <div class="picker-list" ref="pickerList" @scroll="onScroll">
@@ -204,10 +282,6 @@
                                     {{ n-1 }}
                                 </div>
                             </div>
-                        </div>
-                        <div class="picker-actions">
-                            <button class="picker-btn picker-cancel" @click="closePicker">Cancel</button>
-                            <button class="picker-btn picker-confirm" @click="confirmScore">Confirm</button>
                         </div>
                     </div>
                 </div>
