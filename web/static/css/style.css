@@ -358,9 +358,20 @@ td {
     font-weight: 600;
 }
 
-.picker-header span {
+.picker-title-group {
+    text-align: center;
+    line-height: 1.1;
+}
+
+.picker-title {
     font-weight: 600;
     font-size: 1.1em;
+}
+
+.picker-subtitle {
+    font-size: 0.8em;
+    color: #666;
+    font-weight: 400;
 }
 
 .multi-picker-layout {

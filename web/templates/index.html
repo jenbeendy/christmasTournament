@@ -267,7 +267,10 @@
                     <div class="picker-content">
                         <div class="picker-header">
                             <button @click="closePicker">Cancel</button>
-                            <span>Hole # {{ pickerHole }}</span>
+                            <div class="picker-title-group">
+                                <div class="picker-title">Hole # {{ pickerHole }}</div>
+                                <div class="picker-subtitle">PAR {{ getPar(pickerHole) }}</div>
+                            </div>
                             <button @click="confirmScore" class="confirm-text">Done</button>
                         </div>
                         <div class="multi-picker-layout">
