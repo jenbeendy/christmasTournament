@@ -137,18 +137,28 @@
                     <h2>Course Configuration</h2>
                     <div class="actions">
                         <button @click="saveCourse">Save Changes</button>
+                        <hr>
+                        <div style="margin-top: 10px;">
+                            <a href="/api/course/export" class="button-link"
+                                style="text-decoration: none; padding: 5px 10px; background: #eee; border: 1px solid #ccc; color: black; border-radius: 4px; font-size: 0.9em;">Export
+                                CSV</a>
+                            <label style="margin-left: 20px;">Import CSV: </label>
+                            <input type="file" @change="uploadCourse" accept=".csv">
+                        </div>
                     </div>
                     <table>
                         <thead>
                             <tr>
                                 <th>Hole</th>
                                 <th>Par</th>
+                                <th>Length (m)</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="hole in course" :key="hole.hole_number">
                                 <td>{{ hole.hole_number }}</td>
-                                <td><input type="number" v-model.number="hole.par" min="3" max="6"></td>
+                                <td><input type="number" v-model.number="hole.par" min="3" max="5"></td>
+                                <td><input type="number" v-model.number="hole.length" min="50" max="600"></td>
                             </tr>
                         </tbody>
                     </table>

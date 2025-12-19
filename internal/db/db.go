@@ -55,7 +55,8 @@ func createTables() {
 
 	createHolesTable := `CREATE TABLE IF NOT EXISTS holes (
 		hole_number INTEGER PRIMARY KEY,
-		par INTEGER
+		par INTEGER,
+		length INTEGER DEFAULT 0
 	);`
 
 	_, err := DB.Exec(createPlayersTable)
@@ -83,12 +84,15 @@ func createTables() {
 		log.Fatal(err)
 	}
 
+	// Migrations: Add length if it doesn't exist
+	_, _ = DB.Exec("ALTER TABLE holes ADD COLUMN length INTEGER DEFAULT 0")
+
 	// Populate holes if empty
 	var count int
 	DB.QueryRow("SELECT COUNT(*) FROM holes").Scan(&count)
 	if count == 0 {
 		for i := 1; i <= 18; i++ {
-			DB.Exec("INSERT INTO holes (hole_number, par) VALUES (?, ?)", i, 4)
+			DB.Exec("INSERT INTO holes (hole_number, par, length) VALUES (?, ?, ?)", i, 4, 300)
 		}
 	}
 }

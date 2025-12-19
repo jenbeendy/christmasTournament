@@ -65,6 +65,18 @@ createApp({
             fetchPlayers();
         };
 
+        const uploadCourse = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            await fetch('/api/course/import', {
+                method: 'POST',
+                body: formData
+            });
+            fetchCourse();
+        };
+
         // Save Player (Create or Update)
         const savePlayer = async () => {
             if (!playerForm.value.name || !playerForm.value.surname) {
@@ -237,14 +249,8 @@ createApp({
 
         // ... (inside setup)
 
-        // Distances (Mock data based on image for first 9, repeated/invented for back 9)
-        const distances = [
-            271, 316, 412, 114, 432, 178, 458, 351, 331,
-            271, 316, 412, 114, 432, 178, 458, 351, 331 // Repeat for now
-        ];
-
         const getDistance = (hole) => {
-            return distances[hole - 1] || 0;
+            return (course.value && course.value[hole - 1]) ? course.value[hole - 1].length : 0;
         };
 
 
@@ -392,6 +398,7 @@ createApp({
             editPlayer,
             cancelEdit,
             uploadPlayers,
+            uploadCourse,
             deletePlayer,
             createFlight,
             deleteFlight,

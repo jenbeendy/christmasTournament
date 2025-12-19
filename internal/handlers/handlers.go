@@ -451,7 +451,7 @@ func ResultsHandler(w http.ResponseWriter, r *http.Request) {
 
 func CourseHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		rows, err := db.DB.Query("SELECT hole_number, par FROM holes ORDER BY hole_number")
+		rows, err := db.DB.Query("SELECT hole_number, par, length FROM holes ORDER BY hole_number")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -461,13 +461,15 @@ func CourseHandler(w http.ResponseWriter, r *http.Request) {
 		var holes []struct {
 			HoleNumber int `json:"hole_number"`
 			Par        int `json:"par"`
+			Length     int `json:"length"`
 		}
 		for rows.Next() {
 			var h struct {
 				HoleNumber int `json:"hole_number"`
 				Par        int `json:"par"`
+				Length     int `json:"length"`
 			}
-			if err := rows.Scan(&h.HoleNumber, &h.Par); err != nil {
+			if err := rows.Scan(&h.HoleNumber, &h.Par, &h.Length); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -478,6 +480,7 @@ func CourseHandler(w http.ResponseWriter, r *http.Request) {
 		var holes []struct {
 			HoleNumber int `json:"hole_number"`
 			Par        int `json:"par"`
+			Length     int `json:"length"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&holes); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -491,7 +494,7 @@ func CourseHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, h := range holes {
-			_, err := tx.Exec("UPDATE holes SET par = ? WHERE hole_number = ?", h.Par, h.HoleNumber)
+			_, err := tx.Exec("UPDATE holes SET par = ?, length = ? WHERE hole_number = ?", h.Par, h.Length, h.HoleNumber)
 			if err != nil {
 				tx.Rollback()
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -505,4 +508,93 @@ func CourseHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusOK)
 	}
+}
+
+func ImportCourseHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		http.Error(w, "Failed to parse CSV", http.StatusBadRequest)
+		return
+	}
+
+	tx, err := db.DB.Begin()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for i, record := range records {
+		// Skip header: Hole, Par, Length
+		if i == 0 || len(record) < 3 {
+			continue
+		}
+
+		hole, _ := strconv.Atoi(record[0])
+		par, _ := strconv.Atoi(record[1])
+		length, _ := strconv.Atoi(record[2])
+
+		if hole < 1 || hole > 18 {
+			continue
+		}
+
+		_, err = tx.Exec("UPDATE holes SET par = ?, length = ? WHERE hole_number = ?", par, length, hole)
+		if err != nil {
+			tx.Rollback()
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func ExportCourseHandler(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.DB.Query("SELECT hole_number, par, length FROM holes ORDER BY hole_number")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", "attachment;filename=course_config.csv")
+
+	writer := csv.NewWriter(w)
+	writer.Write([]string{"Hole", "Par", "Length"})
+
+	for rows.Next() {
+		var hole, par, length int
+		if err := rows.Scan(&hole, &par, &length); err != nil {
+			continue
+		}
+		writer.Write([]string{
+			strconv.Itoa(hole),
+			strconv.Itoa(par),
+			strconv.Itoa(length),
+		})
+	}
+	writer.Flush()
 }

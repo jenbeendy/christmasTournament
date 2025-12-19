@@ -34,6 +34,8 @@ func main() {
 	http.HandleFunc("/api/scores", handlers.ScoresHandler)                   // POST (submit)
 	http.HandleFunc("/api/results", handlers.ResultsHandler)                 // GET
 	http.HandleFunc("/api/course", handlers.CourseHandler)                   // GET, POST
+	http.HandleFunc("/api/course/import", handlers.ImportCourseHandler)      // POST
+	http.HandleFunc("/api/course/export", handlers.ExportCourseHandler)      // GET
 
 	// Admin Pages (serving HTML for now, or just API if SPA)
 	// For this plan, we'll serve the main index.html and let Vue handle routing or just simple pages
