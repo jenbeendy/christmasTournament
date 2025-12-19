@@ -342,6 +342,23 @@ createApp({
             return (course.value && course.value[hole - 1]) ? course.value[hole - 1].par : 4;
         };
 
+        const getScoreStyle = (score, hole) => {
+            if (!score) return { backgroundColor: '#E6E6E6' }; // Default gray
+
+            const par = getPar(hole);
+            const diff = parseInt(score) - par;
+
+            // Premium Golf Color Palette
+            if (diff === 0) return { backgroundColor: '#FCF6A1' }; // Par - Soft Yellow
+            if (diff === 1) return { backgroundColor: '#D3D1EB' }; // Bogey - Lavender
+            if (diff === 2) return { backgroundColor: '#BBB0EB' }; // Double Bogey - Purple
+            if (diff >= 3) return { backgroundColor: '#9A78DB' }; // Triple+ - Deep Purple
+            if (diff === -1) return { backgroundColor: '#F5C5C4' }; // Birdie - Soft Red/Salmon
+            if (diff <= -2) return { backgroundColor: '#F59391' }; // Eagle+ - Vibrant Salmon
+
+            return { backgroundColor: '#E6E6E6' };
+        };
+
         const getPlayerTotal = (playerId, startHole, endHole) => {
             let total = 0;
             for (let h = startHole; h <= endHole; h++) {
@@ -382,6 +399,7 @@ createApp({
             getInitials,
             showPicker,
             pickerValue,
+            pickerHole,
             pickerList,
             openPicker,
             scrollToValue,
@@ -391,7 +409,8 @@ createApp({
             closePicker,
             getDistance,
             getPar,
-            getPlayerTotal
+            getPlayerTotal,
+            getScoreStyle
         };
     }
 }).mount('#app');

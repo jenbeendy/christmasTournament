@@ -204,7 +204,7 @@
                             </div>
                             <div v-for="player in currentFlight.players" :key="player.id" class="score-cell-wrapper"
                                 @click="openPicker(player.id, hole, getScore(player.id, hole))">
-                                <div class="score-msg-box">
+                                <div class="score-msg-box" :style="getScoreStyle(getScore(player.id, hole), hole)">
                                     <div class="dist-text">{{ getDistance(hole) }}m</div>
                                     <div class="score-val">
                                         {{ getScore(player.id, hole) }}
@@ -232,7 +232,8 @@
                             </div>
                             <div v-for="player in currentFlight.players" :key="player.id" class="score-cell-wrapper"
                                 @click="openPicker(player.id, hole + 9, getScore(player.id, hole + 9))">
-                                <div class="score-msg-box">
+                                <div class="score-msg-box"
+                                    :style="getScoreStyle(getScore(player.id, hole + 9), hole + 9)">
                                     <div class="dist-text">{{ getDistance(hole + 9) }}m</div>
                                     <div class="score-val">
                                         {{ getScore(player.id, hole + 9) }}
@@ -270,7 +271,7 @@
                     <div class="picker-content">
                         <div class="picker-header">
                             <button @click="closePicker">Cancel</button>
-                            <span>Hole {{ pickerHole }}</span>
+                            <span>Hole # {{ pickerHole }}</span>
                             <button @click="confirmScore" class="confirm-text">Done</button>
                         </div>
                         <!-- Provide a more iOS-like picker aesthetic? For now keep existing or slightly refine -->
