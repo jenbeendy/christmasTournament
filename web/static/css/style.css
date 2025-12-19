@@ -1,8 +1,26 @@
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    line-height: 1.5;
+    background: #f0f2f5;
+    color: #333;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.landing-view {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: white;
+}
+
+.landing-view h1 {
+    font-size: 3em;
+    font-weight: 200;
+    color: #1b4d3e;
+    letter-spacing: 2px;
 }
 
 /* Global / Admin Styles need padding, let's wrap admin in a container or handle it */
@@ -30,16 +48,31 @@ header h1 {
 */
 
 /* Admin Styles */
+nav {
+    padding-bottom: 20px;
+}
+
 nav button {
-    padding: 10px 20px;
-    margin-left: 10px;
+    padding: 8px 16px;
+    margin: 0 5px;
     cursor: pointer;
+    border: 1px solid #ddd;
+    background: #f8f8f8;
+    border-radius: 4px;
+    color: #666;
+    font-size: 0.9em;
+    transition: all 0.2s;
 }
 
 nav button.active {
-    background-color: #007bff;
+    background-color: #1b4d3e;
     color: white;
-    border: none;
+    border-color: #1b4d3e;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+nav button:hover:not(.active) {
+    background: #eee;
 }
 
 .tabs {

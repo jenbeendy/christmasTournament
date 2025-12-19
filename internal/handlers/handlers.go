@@ -446,9 +446,9 @@ func ScoresHandler(w http.ResponseWriter, r *http.Request) {
 func ResultsHandler(w http.ResponseWriter, r *http.Request) {
 	// Calculate total scores
 	rows, err := db.DB.Query(`
-		SELECT p.id, p.name, p.surname, p.handicap, SUM(s.strokes) as total_strokes
+		SELECT p.id, p.name, p.surname, p.handicap, COALESCE(SUM(s.strokes), 0) as total_strokes, COUNT(s.id) as holes_played
 		FROM players p
-		JOIN scores s ON p.id = s.player_id
+		LEFT JOIN scores s ON p.id = s.player_id
 		GROUP BY p.id
 	`)
 	if err != nil {
@@ -462,21 +462,37 @@ func ResultsHandler(w http.ResponseWriter, r *http.Request) {
 		var pID int
 		var pName, pSurname string
 		var pHandicap float64
-		var totalStrokes int
-		if err := rows.Scan(&pID, &pName, &pSurname, &pHandicap, &totalStrokes); err != nil {
+		var totalStrokes, holesPlayed int
+		if err := rows.Scan(&pID, &pName, &pSurname, &pHandicap, &totalStrokes, &holesPlayed); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
 		netScore := float64(totalStrokes) - pHandicap
 		results = append(results, map[string]interface{}{
-			"player_id": pID,
-			"name":      pName,
-			"surname":   pSurname,
-			"handicap":  pHandicap,
-			"gross":     totalStrokes,
-			"net":       netScore,
+			"id":           pID,
+			"name":         pName,
+			"surname":      pSurname,
+			"handicap":     pHandicap,
+			"gross":        totalStrokes,
+			"net":          netScore,
+			"holes_played": holesPlayed,
 		})
 	}
+
+	// Sort by Net score
+	sort.Slice(results, func(i, j int) bool {
+		// If gross is 0, they haven't started or have 0 strokes.
+		// Put players with 0 holes at the bottom
+		if results[i]["holes_played"].(int) == 0 && results[j]["holes_played"].(int) > 0 {
+			return false
+		}
+		if results[j]["holes_played"].(int) == 0 && results[i]["holes_played"].(int) > 0 {
+			return true
+		}
+		return results[i]["net"].(float64) < results[j]["net"].(float64)
+	})
+
 	json.NewEncoder(w).Encode(results)
 }
 

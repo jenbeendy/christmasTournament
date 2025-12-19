@@ -12,24 +12,24 @@
 
 <body>
     <div id="app">
-        <header style="text-align: center; background: white; border-bottom: 1px solid #eee;">
+        <header v-if="view !== 'landing'" style="text-align: center; background: white; border-bottom: 1px solid #eee;">
             <h1 style="margin: 0; padding: 20px 0;">Christmas Tournament</h1>
-            <nav v-if="view !== 'scoring'">
-                <button @click="view = 'admin'" :class="{active: view === 'admin'}">Admin</button>
-                <button @click="view = 'scoring'" :class="{active: view === 'scoring'}">Scoring</button>
+            <nav v-if="view === 'admin'">
+                <button @click="adminTab = 'players'" :class="{active: adminTab === 'players'}">Players</button>
+                <button @click="adminTab = 'flights'" :class="{active: adminTab === 'flights'}">Flights</button>
+                <button @click="adminTab = 'results'" :class="{active: adminTab === 'results'}">Results</button>
+                <button @click="adminTab = 'course'" :class="{active: adminTab === 'course'}">Course</button>
             </nav>
         </header>
 
         <main>
+            <!-- Landing View -->
+            <div v-if="view === 'landing'" class="landing-view">
+                <h1>Christmas Tournament</h1>
+            </div>
+
             <!-- Admin View -->
             <div v-if="view === 'admin'" class="admin-panel">
-                <div class="tabs">
-                    <button @click="adminTab = 'players'" :class="{active: adminTab === 'players'}">Players</button>
-                    <button @click="adminTab = 'flights'" :class="{active: adminTab === 'flights'}">Flights</button>
-                    <button @click="adminTab = 'results'" :class="{active: adminTab === 'results'}">Results</button>
-                    <button @click="adminTab = 'course'" :class="{active: adminTab === 'course'}">Course</button>
-                </div>
-
                 <!-- Players Tab -->
                 <div v-if="adminTab === 'players'">
                     <h2>Players</h2>
@@ -132,11 +132,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(r, index) in results" :key="r.player.id">
+                            <tr v-for="(r, index) in results" :key="r.id">
                                 <td>{{ index + 1 }}</td>
-                                <td>{{ r.player.name }} {{ r.player.surname }}</td>
-                                <td>{{ r.gross_score }}</td>
-                                <td>{{ r.net_score }}</td>
+                                <td>{{ r.name }} {{ r.surname }}</td>
+                                <td>{{ r.gross }}</td>
+                                <td>{{ r.net.toFixed(1) }}</td>
                             </tr>
                         </tbody>
                     </table>

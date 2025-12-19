@@ -2,7 +2,7 @@ const { createApp, ref, onMounted, computed, watch, nextTick } = Vue;
 
 createApp({
     setup() {
-        const view = ref('admin');
+        const view = ref('landing'); // Default to landing
         const adminTab = ref('players');
         const players = ref([]);
         const flights = ref([]);
@@ -290,15 +290,18 @@ createApp({
             fetchResults();
             fetchCourse();
 
-            // Check URL params
+            const path = window.location.pathname;
             const urlParams = new URLSearchParams(window.location.search);
-            const viewParam = urlParams.get('view');
             const tokenParam = urlParams.get('token');
 
-            if (viewParam === 'scoring' && tokenParam) {
+            if (path === '/adminpage') {
+                view.value = 'admin';
+            } else if (tokenParam) {
                 view.value = 'scoring';
                 flightToken.value = tokenParam;
                 loadFlight();
+            } else {
+                view.value = 'landing';
             }
         });
 

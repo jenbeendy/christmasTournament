@@ -38,8 +38,21 @@ func main() {
 	http.HandleFunc("/api/course/import", handlers.ImportCourseHandler)      // POST
 	http.HandleFunc("/api/course/export", handlers.ExportCourseHandler)      // GET
 
-	// Admin Pages (serving HTML for now, or just API if SPA)
-	// For this plan, we'll serve the main index.html and let Vue handle routing or just simple pages
+	// Admin Pages
+	http.HandleFunc("/adminpage", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		http.ServeFile(w, r, "./web/templates/index.html")
+	})
+
+	http.HandleFunc("/adminscorepage", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		http.ServeFile(w, r, "./web/templates/leaderboard.html")
+	})
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 		w.Header().Set("Pragma", "no-cache")
