@@ -112,49 +112,14 @@ td {
     flex-direction: column;
 }
 
-/* App Header */
-.app-header {
-    background-color: #3578A9;
-    color: white;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.1em;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
+/* Removed app-header styles */
 
-.nav-left,
-.nav-right {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-}
-
-.icon-back {
-    font-size: 1.5em;
-    margin-right: 5px;
-    font-weight: 300;
-    /* thinner chevron */
-}
-
-.nav-title {
-    font-weight: 500;
-}
-
-.icon-group span {
-    margin-left: 20px;
-    font-size: 1.3em;
-}
 
 /* Player Header */
 .player-header-container {
     display: flex;
     position: sticky;
-    top: 55px;
-    /* app-header height approx */
+    top: 0;
     background: white;
     z-index: 90;
     border-bottom: 1px solid #e0e0e0;

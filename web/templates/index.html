@@ -12,8 +12,8 @@
 
 <body>
     <div id="app">
-        <header>
-            <h1>Christmas Tournament</h1>
+        <header style="text-align: center; background: white; border-bottom: 1px solid #eee;">
+            <h1 style="margin: 0; padding: 20px 0;">Christmas Tournament</h1>
             <nav v-if="view !== 'scoring'">
                 <button @click="view = 'admin'" :class="{active: view === 'admin'}">Admin</button>
                 <button @click="view = 'scoring'" :class="{active: view === 'scoring'}">Scoring</button>
@@ -163,26 +163,12 @@
                     <button @click="loadFlight">Load Flight</button>
                 </div>
                 <div v-else class="scoring-view">
-                    <!-- App Header -->
-                    <header class="app-header">
-                        <div class="nav-left" @click="view = 'admin'">
-                            <span class="icon-back">&lt;</span> Turnaj
-                        </div>
-                        <div class="nav-title">
-                            Flight {{ currentFlight.id }} / 12
-                        </div>
-                        <div class="nav-right">
-                            <div class="icon-group">
-                                <span>&#128202;</span>
-                                <span>&#8942;</span>
-                            </div>
-                        </div>
-                    </header>
+                    <!-- Removed blue app-header -->
+
 
                     <!-- Player Header (Sticky) -->
                     <div class="player-header-container">
                         <div class="hole-header-cell">
-                            <span class="start-label">START<br>10:00</span>
                         </div>
                         <div class="player-header-row">
                             <div v-for="player in currentFlight.players" :key="player.id" class="player-header-card">
