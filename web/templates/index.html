@@ -228,7 +228,7 @@
                     <div class="scoring-grid">
                         <!-- Holes 1-9 -->
                         <div v-for="hole in 9" :key="hole" class="hole-row"
-                            :class="{ 'starting-hole-row': hole === currentFlight?.starting_hole }">
+                            :class="{ 'starting-hole-row': hole === currentFlight?.starting_hole && !isHoleScored(hole) }">
                             <div class="hole-info-cell">
                                 <div class="hole-number"># {{ hole }}</div>
                                 <div class="hole-par">PAR {{ getPar(hole) }}</div>
@@ -257,7 +257,7 @@
 
                         <!-- Holes 10-18 -->
                         <div v-for="hole in 9" :key="hole + 9" class="hole-row"
-                            :class="{ 'starting-hole-row': (hole + 9) === currentFlight?.starting_hole }">
+                            :class="{ 'starting-hole-row': (hole + 9) === currentFlight?.starting_hole && !isHoleScored(hole + 9) }">
                             <div class="hole-info-cell">
                                 <div class="hole-number"># {{ hole + 9 }}</div>
                                 <div class="hole-par">PAR {{ getPar(hole + 9) }}</div>

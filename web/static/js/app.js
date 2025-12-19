@@ -455,6 +455,11 @@ createApp({
             return total;
         };
 
+        const isHoleScored = (hole) => {
+            if (!currentFlight.value) return false;
+            return currentFlight.value.players.some(p => getScore(p.id, hole) !== '');
+        };
+
         const closeWarning = () => {
             showWarning.value = false;
         };
@@ -507,6 +512,7 @@ createApp({
             getPar,
             getPlayerTotal,
             getScoreStyle,
+            isHoleScored,
             downloadQR,
             downloadAllQRs
         };
