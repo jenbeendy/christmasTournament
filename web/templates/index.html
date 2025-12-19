@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Christmas Golf Tournament</title>
+    <title>Vánoční golfový turnaj</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
@@ -14,61 +14,60 @@
 <body>
     <div id="app">
         <header v-if="view !== 'landing'" style="text-align: center; background: white; border-bottom: 1px solid #eee;">
-            <h1 style="margin: 0; padding: 20px 0;">Christmas Tournament</h1>
+            <h1 style="margin: 0; padding: 20px 0;">Vánoční turnaj</h1>
             <nav v-if="view === 'admin'">
-                <button @click="adminTab = 'players'" :class="{active: adminTab === 'players'}">Players</button>
-                <button @click="adminTab = 'flights'" :class="{active: adminTab === 'flights'}">Flights</button>
-                <button @click="adminTab = 'results'" :class="{active: adminTab === 'results'}">Results</button>
-                <button @click="adminTab = 'course'" :class="{active: adminTab === 'course'}">Course</button>
-                <button @click="adminTab = 'flights-qr'" :class="{active: adminTab === 'flights-qr'}">Flights
-                    QR</button>
+                <button @click="adminTab = 'players'" :class="{active: adminTab === 'players'}">Hráči</button>
+                <button @click="adminTab = 'flights'" :class="{active: adminTab === 'flights'}">Flighty</button>
+                <button @click="adminTab = 'results'" :class="{active: adminTab === 'results'}">Výsledky</button>
+                <button @click="adminTab = 'course'" :class="{active: adminTab === 'course'}">Hřiště</button>
+                <button @click="adminTab = 'flights-qr'" :class="{active: adminTab === 'flights-qr'}">QR kódy</button>
             </nav>
         </header>
 
         <main>
             <!-- Landing View -->
             <div v-if="view === 'landing'" class="landing-view">
-                <h1>Christmas Tournament</h1>
+                <h1>Vánoční turnaj</h1>
             </div>
 
             <!-- Admin View -->
             <div v-if="view === 'admin'" class="admin-panel">
                 <!-- Players Tab -->
                 <div v-if="adminTab === 'players'">
-                    <h2>Players</h2>
+                    <h2>Hráči</h2>
                     <div class="actions">
                         <div class="player-form">
-                            <h3>{{ isEditing ? 'Edit Player' : 'Add Player' }}</h3>
-                            <input v-model="playerForm.name" placeholder="Name">
-                            <input v-model="playerForm.surname" placeholder="Surname">
-                            <input v-model="playerForm.reg_num" placeholder="Reg Num">
-                            <input v-model.number="playerForm.handicap" type="number" step="0.1" placeholder="Handicap">
+                            <h3>{{ isEditing ? 'Upravit hráče' : 'Přidat hráče' }}</h3>
+                            <input v-model="playerForm.name" placeholder="Jméno">
+                            <input v-model="playerForm.surname" placeholder="Příjmení">
+                            <input v-model="playerForm.reg_num" placeholder="Reg. č.">
+                            <input v-model.number="playerForm.handicap" type="number" step="0.1" placeholder="HCP">
                             <select v-model="playerForm.gender">
-                                <option value="M">Male</option>
-                                <option value="F">Female</option>
+                                <option value="M">Muž</option>
+                                <option value="F">Žena</option>
                             </select>
-                            <button @click="savePlayer">{{ isEditing ? 'Update' : 'Add' }}</button>
-                            <button v-if="isEditing" @click="cancelEdit">Cancel</button>
+                            <button @click="savePlayer">{{ isEditing ? 'Uložit' : 'Přidat' }}</button>
+                            <button v-if="isEditing" @click="cancelEdit">Zrušit</button>
                         </div>
                         <hr>
-                        <label>Import CSV: </label>
+                        <label>Importovat CSV: </label>
                         <input type="file" @change="uploadPlayers" accept=".csv">
                         <div style="margin-top: 15px;">
                             <button @click="fetchHCPs" :disabled="isFetchingHCP"
-                                style="background: #1b4d3e; color: white;">Fetch missing HCPs</button>
-                            <span v-if="isFetchingHCP" style="margin-left: 10px; font-style: italic;">Fetching
-                                handicaps... this may take a while.</span>
+                                style="background: #1b4d3e; color: white;">Načíst chybějící HCP</button>
+                            <span v-if="isFetchingHCP" style="margin-left: 10px; font-style: italic;">Načítám
+                                handicapy... může to chvíli trvat.</span>
                         </div>
                     </div>
                     <table>
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Surname</th>
-                                <th>Reg Num</th>
-                                <th>Handicap</th>
-                                <th>Gender</th>
-                                <th>Actions</th>
+                                <th>Jméno</th>
+                                <th>Příjmení</th>
+                                <th>Reg. č.</th>
+                                <th>HCP</th>
+                                <th>Pohlaví</th>
+                                <th>Akce</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -77,10 +76,10 @@
                                 <td>{{ player.surname }}</td>
                                 <td>{{ player.reg_num }}</td>
                                 <td>{{ player.handicap }}</td>
-                                <td>{{ player.gender === 'F' ? 'Female' : 'Male' }}</td>
+                                <td>{{ player.gender === 'F' ? 'Žena' : 'Muž' }}</td>
                                 <td>
-                                    <button @click="editPlayer(player)">Edit</button>
-                                    <button @click="deletePlayer(player.id)">Delete</button>
+                                    <button @click="editPlayer(player)">Upravit</button>
+                                    <button @click="deletePlayer(player.id)">Smazat</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -89,19 +88,19 @@
 
                 <!-- Flights Tab -->
                 <div v-if="adminTab === 'flights'">
-                    <h2>Flights</h2>
+                    <h2>Flighty</h2>
                     <div class="create-flight" style="margin-bottom: 20px;">
-                        <input v-model="newFlightName" placeholder="Flight Name">
-                        <label style="margin-left: 10px;">Starting Hole: </label>
+                        <input v-model="newFlightName" placeholder="Název flightu">
+                        <label style="margin-left: 10px;">Startovní jamka: </label>
                         <select v-model="newFlightStartingHole">
                             <option v-for="h in 18" :key="h" :value="h">{{ h }}</option>
                         </select>
-                        <button @click="createFlight" style="margin-left: 10px;">Create Flight</button>
+                        <button @click="createFlight" style="margin-left: 10px;">Vytvořit flight</button>
                     </div>
 
                     <div class="flights-container">
                         <div class="flight-column">
-                            <h3>Unassigned</h3>
+                            <h3>Nepřiřazení</h3>
                             <div id="unassigned-players" class="player-list">
                                 <div v-for="player in unassignedPlayers" :key="player.id" :data-id="player.id"
                                     class="player-card">
@@ -116,13 +115,14 @@
                                     style="width: 100px; font-weight: bold; border: none; background: transparent;">
                                 <select v-model="flight.starting_hole" @change="updateFlight(flight)"
                                     style="font-size: 0.8em; margin-left: 5px;">
-                                    <option v-for="h in 18" :key="h" :value="h">Hole {{ h }}</option>
+                                    <option v-for="h in 18" :key="h" :value="h">Jamka {{ h }}</option>
                                 </select>
                                 <button @click="deleteFlight(flight.id)"
                                     style="float: right; font-size: 0.8em; color: red; border: none; background: transparent; cursor: pointer;">✕</button>
                             </h3>
                             <p style="font-size: 0.8em; color: #666; margin-top: -5px;">Token: {{ flight.token }}</p>
-                            <p><a :href="'/?view=scoring&token=' + flight.token" target="_blank">Scoring Link</a></p>
+                            <p><a :href="'/?view=scoring&token=' + flight.token" target="_blank">Odkaz na skórování</a>
+                            </p>
                             <div :id="'flight-' + flight.id" class="player-list flight-list"
                                 :data-flight-id="flight.id">
                                 <div v-for="player in flight.players" :key="player.id" :data-id="player.id"
@@ -136,14 +136,14 @@
 
                 <!-- Results Tab -->
                 <div v-if="adminTab === 'results'">
-                    <h2>Results</h2>
+                    <h2>Výsledky</h2>
                     <table>
                         <thead>
                             <tr>
-                                <th>Rank</th>
-                                <th>Player</th>
-                                <th>Gross</th>
-                                <th>Net</th>
+                                <th>Pořadí</th>
+                                <th>Hráč</th>
+                                <th>Brutto</th>
+                                <th>Netto</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -159,25 +159,25 @@
 
                 <!-- Course Tab -->
                 <div v-if="adminTab === 'course'">
-                    <h2>Course Configuration</h2>
+                    <h2>Konfigurace hřiště</h2>
                     <div class="actions">
-                        <button @click="saveCourse">Save Changes</button>
+                        <button @click="saveCourse">Uložit změny</button>
                         <hr>
                         <div style="margin-top: 10px;">
                             <a href="/api/course/export" class="button-link"
-                                style="text-decoration: none; padding: 5px 10px; background: #eee; border: 1px solid #ccc; color: black; border-radius: 4px; font-size: 0.9em;">Export
+                                style="text-decoration: none; padding: 5px 10px; background: #eee; border: 1px solid #ccc; color: black; border-radius: 4px; font-size: 0.9em;">Exportovat
                                 CSV</a>
-                            <label style="margin-left: 20px;">Import CSV: </label>
+                            <label style="margin-left: 20px;">Importovat CSV: </label>
                             <input type="file" @change="uploadCourse" accept=".csv">
                         </div>
                     </div>
                     <table>
                         <thead>
                             <tr>
-                                <th>Hole</th>
+                                <th>Jamka</th>
                                 <th>Par</th>
-                                <th>Yellow (m)</th>
-                                <th>Red (m)</th>
+                                <th>Žlutá (m)</th>
+                                <th>Červená (m)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -195,19 +195,19 @@
                 <div v-if="adminTab === 'flights-qr'">
                     <div
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2>Flights QR Codes</h2>
+                        <h2>QR kódy flightů</h2>
                         <button @click="downloadAllQRs"
-                            style="background: #1b4d3e; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;">Download
-                            All QRs</button>
+                            style="background: #1b4d3e; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;">Stáhnout
+                            vše</button>
                     </div>
                     <div class="qr-grid">
                         <div v-for="flight in flights" :key="flight.id" class="qr-card">
                             <h3>{{ flight.name }}</h3>
-                            <div class="qr-info">Starting Hole: <strong>{{ flight.starting_hole }}</strong></div>
+                            <div class="qr-info">Startovní jamka: <strong>{{ flight.starting_hole }}</strong></div>
                             <div :id="'qr-' + flight.id" class="qr-container"></div>
                             <div class="qr-url">https://vanoce.jdark.org/?t={{ flight.token }}</div>
                             <div class="qr-token">{{ flight.token }}</div>
-                            <button @click="downloadQR(flight)" class="qr-download-btn">Download PNG</button>
+                            <button @click="downloadQR(flight)" class="qr-download-btn">Stáhnout PNG</button>
                         </div>
                     </div>
                 </div>
@@ -216,9 +216,9 @@
             <!-- Scoring View -->
             <div v-if="view === 'scoring'" class="scoring-panel">
                 <div v-if="!currentFlight" class="flight-entry">
-                    <h2>Enter Flight Token</h2>
+                    <h2>Zadejte token flightu</h2>
                     <input v-model="flightToken" placeholder="Token">
-                    <button @click="loadFlight">Load Flight</button>
+                    <button @click="loadFlight">Načíst flight</button>
                 </div>
                 <div v-else class="scoring-view">
                     <!-- Removed blue app-header -->
@@ -320,12 +320,12 @@
                 <div v-if="showPicker" class="picker-modal" @click.self="closePicker">
                     <div class="picker-content">
                         <div class="picker-header">
-                            <button @click="closePicker">Cancel</button>
+                            <button @click="closePicker">Zrušit</button>
                             <div class="picker-title-group">
-                                <div class="picker-title">Hole # {{ pickerHole }}</div>
+                                <div class="picker-title">Jamka č. {{ pickerHole }}</div>
                                 <div class="picker-subtitle">PAR {{ getPar(pickerHole) }}</div>
                             </div>
-                            <button @click="confirmScore" class="confirm-text">Done</button>
+                            <button @click="confirmScore" class="confirm-text">Potvrdit</button>
                         </div>
                         <div class="multi-picker-layout">
                             <div v-for="player in currentFlight.players" :key="player.id" class="player-picker-col">
