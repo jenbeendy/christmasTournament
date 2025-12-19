@@ -6,6 +6,7 @@ type Player struct {
 	Surname  string  `json:"surname"`
 	RegNum   string  `json:"reg_num"`
 	Handicap float64 `json:"handicap"`
+	Gender   string  `json:"gender"`
 }
 
 type Flight struct {

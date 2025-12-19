@@ -17,7 +17,7 @@ import (
 
 func PlayersHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		rows, err := db.DB.Query("SELECT id, name, surname, reg_num, handicap FROM players")
+		rows, err := db.DB.Query("SELECT id, name, surname, reg_num, handicap, gender FROM players")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -27,7 +27,7 @@ func PlayersHandler(w http.ResponseWriter, r *http.Request) {
 		var players []models.Player
 		for rows.Next() {
 			var p models.Player
-			if err := rows.Scan(&p.ID, &p.Name, &p.Surname, &p.RegNum, &p.Handicap); err != nil {
+			if err := rows.Scan(&p.ID, &p.Name, &p.Surname, &p.RegNum, &p.Handicap, &p.Gender); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -43,7 +43,7 @@ func PlayersHandler(w http.ResponseWriter, r *http.Request) {
 
 		if p.ID > 0 {
 			// Update
-			_, err := db.DB.Exec("UPDATE players SET name=?, surname=?, reg_num=?, handicap=? WHERE id=?", p.Name, p.Surname, p.RegNum, p.Handicap, p.ID)
+			_, err := db.DB.Exec("UPDATE players SET name=?, surname=?, reg_num=?, handicap=?, gender=? WHERE id=?", p.Name, p.Surname, p.RegNum, p.Handicap, p.Gender, p.ID)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -51,7 +51,7 @@ func PlayersHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		} else {
 			// Create
-			_, err := db.DB.Exec("INSERT INTO players (name, surname, reg_num, handicap) VALUES (?, ?, ?, ?)", p.Name, p.Surname, p.RegNum, p.Handicap)
+			_, err := db.DB.Exec("INSERT INTO players (name, surname, reg_num, handicap, gender) VALUES (?, ?, ?, ?, ?)", p.Name, p.Surname, p.RegNum, p.Handicap, p.Gender)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return

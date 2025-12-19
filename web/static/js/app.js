@@ -17,7 +17,7 @@ createApp({
         const warningMessage = ref('');
 
         // Player Form State
-        const playerForm = ref({ id: 0, name: '', surname: '', reg_num: '', handicap: 0 });
+        const playerForm = ref({ id: 0, name: '', surname: '', reg_num: '', handicap: 0, gender: 'M' });
         const isEditing = ref(false);
 
         // Fetch Players
@@ -101,7 +101,7 @@ createApp({
         };
 
         const cancelEdit = () => {
-            playerForm.value = { id: 0, name: '', surname: '', reg_num: '', handicap: 0 };
+            playerForm.value = { id: 0, name: '', surname: '', reg_num: '', handicap: 0, gender: 'M' };
             isEditing.value = false;
         };
 

@@ -29,7 +29,8 @@ func createTables() {
 		name TEXT,
 		surname TEXT,
 		reg_num TEXT,
-		handicap REAL
+		handicap REAL,
+		gender TEXT DEFAULT 'M'
 	);`
 
 	createFlightsTable := `CREATE TABLE IF NOT EXISTS flights (
@@ -88,6 +89,7 @@ func createTables() {
 	// Migrations: Add length if it doesn't exist
 	_, _ = DB.Exec("ALTER TABLE holes ADD COLUMN length INTEGER DEFAULT 0")
 	_, _ = DB.Exec("ALTER TABLE flights ADD COLUMN starting_hole INTEGER DEFAULT 1")
+	_, _ = DB.Exec("ALTER TABLE players ADD COLUMN gender TEXT DEFAULT 'M'")
 
 	// Populate holes if empty
 	var count int
