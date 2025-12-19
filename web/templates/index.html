@@ -170,14 +170,16 @@
                             <tr>
                                 <th>Hole</th>
                                 <th>Par</th>
-                                <th>Length (m)</th>
+                                <th>Yellow (m)</th>
+                                <th>Red (m)</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="hole in course" :key="hole.hole_number">
                                 <td>{{ hole.hole_number }}</td>
                                 <td><input type="number" v-model.number="hole.par" min="3" max="5"></td>
-                                <td><input type="number" v-model.number="hole.length" min="50" max="600"></td>
+                                <td><input type="number" v-model.number="hole.length_yellow" min="50" max="600"></td>
+                                <td><input type="number" v-model.number="hole.length_red" min="50" max="600"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -242,7 +244,9 @@
                             <div v-for="player in currentFlight.players" :key="player.id" class="score-cell-wrapper"
                                 @click="openPicker(hole)">
                                 <div class="score-msg-box" :style="getScoreStyle(getScore(player.id, hole), hole)">
-                                    <div class="dist-text">{{ getDistance(hole) }}m</div>
+                                    <div class="dist-text" style="color: black;">
+                                        {{ getDistance(hole, player) }}m
+                                    </div>
                                     <div class="score-val">
                                         {{ getScore(player.id, hole) }}
                                     </div>
@@ -272,7 +276,9 @@
                                 @click="openPicker(hole + 9)">
                                 <div class="score-msg-box"
                                     :style="getScoreStyle(getScore(player.id, hole + 9), hole + 9)">
-                                    <div class="dist-text">{{ getDistance(hole + 9) }}m</div>
+                                    <div class="dist-text" style="color: black;">
+                                        {{ getDistance(hole + 9, player) }}m
+                                    </div>
                                     <div class="score-val">
                                         {{ getScore(player.id, hole + 9) }}
                                     </div>

@@ -270,8 +270,11 @@ createApp({
 
         // ... (inside setup)
 
-        const getDistance = (hole) => {
-            return (course.value && course.value[hole - 1]) ? course.value[hole - 1].length : 0;
+        const getDistance = (hole, player) => {
+            const h = (course.value && course.value[hole - 1]);
+            if (!h) return 0;
+            if (player && player.gender === 'F') return h.length_red;
+            return h.length_yellow;
         };
 
 

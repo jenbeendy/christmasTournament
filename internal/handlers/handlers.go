@@ -144,7 +144,7 @@ func FlightsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		// Get all flights with players
 		rows, err := db.DB.Query(`
-			SELECT f.id, f.token, f.name, f.starting_hole, p.id, p.name, p.surname, p.reg_num, p.handicap
+			SELECT f.id, f.token, f.name, f.starting_hole, p.id, p.name, p.surname, p.reg_num, p.handicap, p.gender
 			FROM flights f
 			LEFT JOIN flight_players fp ON f.id = fp.flight_id
 			LEFT JOIN players p ON fp.player_id = p.id
@@ -167,10 +167,10 @@ func FlightsHandler(w http.ResponseWriter, r *http.Request) {
 			var fID, fStartingHole int
 			var fToken, fName string
 			var pID sql.NullInt64
-			var pName, pSurname, pRegNum sql.NullString
+			var pName, pSurname, pRegNum, pGender sql.NullString
 			var pHandicap sql.NullFloat64
 
-			if err := rows.Scan(&fID, &fToken, &fName, &fStartingHole, &pID, &pName, &pSurname, &pRegNum, &pHandicap); err != nil {
+			if err := rows.Scan(&fID, &fToken, &fName, &fStartingHole, &pID, &pName, &pSurname, &pRegNum, &pHandicap, &pGender); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -198,6 +198,7 @@ func FlightsHandler(w http.ResponseWriter, r *http.Request) {
 					Surname:  pSurname.String,
 					RegNum:   pRegNum.String,
 					Handicap: pHandicap.Float64,
+					Gender:   pGender.String,
 				})
 			}
 		}
@@ -498,25 +499,23 @@ func ResultsHandler(w http.ResponseWriter, r *http.Request) {
 
 func CourseHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		rows, err := db.DB.Query("SELECT hole_number, par, length FROM holes ORDER BY hole_number")
+		rows, err := db.DB.Query("SELECT hole_number, par, length_yellow, length_red FROM holes ORDER BY hole_number")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
 
-		var holes []struct {
-			HoleNumber int `json:"hole_number"`
-			Par        int `json:"par"`
-			Length     int `json:"length"`
+		type HoleInfo struct {
+			HoleNumber   int `json:"hole_number"`
+			Par          int `json:"par"`
+			LengthYellow int `json:"length_yellow"`
+			LengthRed    int `json:"length_red"`
 		}
+		var holes []HoleInfo
 		for rows.Next() {
-			var h struct {
-				HoleNumber int `json:"hole_number"`
-				Par        int `json:"par"`
-				Length     int `json:"length"`
-			}
-			if err := rows.Scan(&h.HoleNumber, &h.Par, &h.Length); err != nil {
+			var h HoleInfo
+			if err := rows.Scan(&h.HoleNumber, &h.Par, &h.LengthYellow, &h.LengthRed); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -524,11 +523,13 @@ func CourseHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		json.NewEncoder(w).Encode(holes)
 	} else if r.Method == http.MethodPost {
-		var holes []struct {
-			HoleNumber int `json:"hole_number"`
-			Par        int `json:"par"`
-			Length     int `json:"length"`
+		type HoleInfo struct {
+			HoleNumber   int `json:"hole_number"`
+			Par          int `json:"par"`
+			LengthYellow int `json:"length_yellow"`
+			LengthRed    int `json:"length_red"`
 		}
+		var holes []HoleInfo
 		if err := json.NewDecoder(r.Body).Decode(&holes); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -541,7 +542,7 @@ func CourseHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, h := range holes {
-			_, err := tx.Exec("UPDATE holes SET par = ?, length = ? WHERE hole_number = ?", h.Par, h.Length, h.HoleNumber)
+			_, err := tx.Exec("UPDATE holes SET par = ?, length_yellow = ?, length_red = ? WHERE hole_number = ?", h.Par, h.LengthYellow, h.LengthRed, h.HoleNumber)
 			if err != nil {
 				tx.Rollback()
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -589,20 +590,24 @@ func ImportCourseHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for i, record := range records {
-		// Skip header: Hole, Par, Length
+		// Skip header: Hole, Par, LengthYellow, LengthRed
 		if i == 0 || len(record) < 3 {
 			continue
 		}
 
 		hole, _ := strconv.Atoi(record[0])
 		par, _ := strconv.Atoi(record[1])
-		length, _ := strconv.Atoi(record[2])
+		lengthYellow, _ := strconv.Atoi(record[2])
+		lengthRed := lengthYellow // Default if not provided
+		if len(record) > 3 {
+			lengthRed, _ = strconv.Atoi(record[3])
+		}
 
 		if hole < 1 || hole > 18 {
 			continue
 		}
 
-		_, err = tx.Exec("UPDATE holes SET par = ?, length = ? WHERE hole_number = ?", par, length, hole)
+		_, err = tx.Exec("UPDATE holes SET par = ?, length_yellow = ?, length_red = ? WHERE hole_number = ?", par, lengthYellow, lengthRed, hole)
 		if err != nil {
 			tx.Rollback()
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -619,7 +624,7 @@ func ImportCourseHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ExportCourseHandler(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.DB.Query("SELECT hole_number, par, length FROM holes ORDER BY hole_number")
+	rows, err := db.DB.Query("SELECT hole_number, par, length_yellow, length_red FROM holes ORDER BY hole_number")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -630,17 +635,18 @@ func ExportCourseHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", "attachment;filename=course_config.csv")
 
 	writer := csv.NewWriter(w)
-	writer.Write([]string{"Hole", "Par", "Length"})
+	writer.Write([]string{"Hole", "Par", "LengthYellow", "LengthRed"})
 
 	for rows.Next() {
-		var hole, par, length int
-		if err := rows.Scan(&hole, &par, &length); err != nil {
+		var hole, par, ly, lr int
+		if err := rows.Scan(&hole, &par, &ly, &lr); err != nil {
 			continue
 		}
 		writer.Write([]string{
 			strconv.Itoa(hole),
 			strconv.Itoa(par),
-			strconv.Itoa(length),
+			strconv.Itoa(ly),
+			strconv.Itoa(lr),
 		})
 	}
 	writer.Flush()
