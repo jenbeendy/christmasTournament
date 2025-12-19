@@ -16,11 +16,25 @@ body {
     background: white;
 }
 
+.landing-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.landing-logo {
+    max-width: 200px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
 .landing-view h1 {
     font-size: 3em;
     font-weight: 200;
     color: #1b4d3e;
     letter-spacing: 2px;
+    margin: 0;
 }
 
 /* Global / Admin Styles need padding, let's wrap admin in a container or handle it */
