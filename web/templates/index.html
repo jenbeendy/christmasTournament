@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -19,6 +20,8 @@
                 <button @click="adminTab = 'flights'" :class="{active: adminTab === 'flights'}">Flights</button>
                 <button @click="adminTab = 'results'" :class="{active: adminTab === 'results'}">Results</button>
                 <button @click="adminTab = 'course'" :class="{active: adminTab === 'course'}">Course</button>
+                <button @click="adminTab = 'flights-qr'" :class="{active: adminTab === 'flights-qr'}">Flights
+                    QR</button>
             </nav>
         </header>
 
@@ -172,6 +175,27 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Flights QR Tab -->
+                <div v-if="adminTab === 'flights-qr'">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Flights QR Codes</h2>
+                        <button @click="downloadAllQRs"
+                            style="background: #1b4d3e; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;">Download
+                            All QRs</button>
+                    </div>
+                    <div class="qr-grid">
+                        <div v-for="flight in flights" :key="flight.id" class="qr-card">
+                            <h3>{{ flight.name }}</h3>
+                            <div class="qr-info">Starting Hole: <strong>{{ flight.starting_hole }}</strong></div>
+                            <div :id="'qr-' + flight.id" class="qr-container"></div>
+                            <div class="qr-url">https://vanoce.jdark.org/?t={{ flight.token }}</div>
+                            <div class="qr-token">{{ flight.token }}</div>
+                            <button @click="downloadQR(flight)" class="qr-download-btn">Download PNG</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 

@@ -509,3 +509,78 @@ td {
     font-weight: 500;
     transform: scale(1.1);
 }
+
+/* Flights QR Tab */
+.qr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.qr-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.qr-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.1em;
+    color: #1b4d3e;
+}
+
+.qr-info {
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.qr-container {
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.qr-container img {
+    display: block;
+}
+
+.qr-url {
+    font-size: 0.65em;
+    color: #3578A9;
+    word-break: break-all;
+    margin-bottom: 5px;
+    padding: 2px 8px;
+    background: #eef7ff;
+    border-radius: 4px;
+}
+
+.qr-token {
+    font-size: 0.7em;
+    color: #999;
+    font-family: monospace;
+    margin-bottom: 15px;
+}
+
+.qr-download-btn {
+    background: #f0f2f5;
+    border: 1px solid #ddd;
+    color: #333;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.qr-download-btn:hover {
+    background: #e4e6e9;
+    border-color: #ccc;
+}

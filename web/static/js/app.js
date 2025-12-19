@@ -277,10 +277,53 @@ createApp({
 
         // ... (inside setup)
 
+        const generateQRs = () => {
+            nextTick(() => {
+                flights.value.forEach(flight => {
+                    const container = document.getElementById('qr-' + flight.id);
+                    if (container) {
+                        container.innerHTML = '';
+                        new QRCode(container, {
+                            text: `https://vanoce.jdark.org/?t=${flight.token}`,
+                            width: 150,
+                            height: 150,
+                            colorDark: "#000000",
+                            colorLight: "#ffffff",
+                            correctLevel: QRCode.CorrectLevel.L
+                        });
+                    }
+                });
+            });
+        };
+
+        const downloadQR = (flight) => {
+            const container = document.getElementById('qr-' + flight.id);
+            if (!container) return;
+            const img = container.querySelector('img');
+            if (!img) return;
+
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = `${flight.name}_${flight.token}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        const downloadAllQRs = () => {
+            flights.value.forEach((flight, index) => {
+                setTimeout(() => {
+                    downloadQR(flight);
+                }, index * 200); // Stagger downloads to avoid browser blocking
+            });
+        };
+
         watch(adminTab, (newVal) => {
             if (newVal === 'flights') {
                 // Fetch flights again to be sure we have latest data and then setup DnD
                 fetchFlights();
+            } else if (newVal === 'flights-qr') {
+                generateQRs();
             }
         });
 
@@ -292,7 +335,7 @@ createApp({
 
             const path = window.location.pathname;
             const urlParams = new URLSearchParams(window.location.search);
-            const tokenParam = urlParams.get('token');
+            const tokenParam = urlParams.get('token') || urlParams.get('t');
 
             if (path === '/adminpage') {
                 view.value = 'admin';
@@ -463,7 +506,9 @@ createApp({
             getDistance,
             getPar,
             getPlayerTotal,
-            getScoreStyle
+            getScoreStyle,
+            downloadQR,
+            downloadAllQRs
         };
     }
 }).mount('#app');
