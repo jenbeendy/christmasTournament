@@ -35,7 +35,8 @@ func createTables() {
 	createFlightsTable := `CREATE TABLE IF NOT EXISTS flights (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		token TEXT UNIQUE,
-		name TEXT
+		name TEXT,
+		starting_hole INTEGER DEFAULT 1
 	);`
 
 	createFlightPlayersTable := `CREATE TABLE IF NOT EXISTS flight_players (
@@ -86,6 +87,7 @@ func createTables() {
 
 	// Migrations: Add length if it doesn't exist
 	_, _ = DB.Exec("ALTER TABLE holes ADD COLUMN length INTEGER DEFAULT 0")
+	_, _ = DB.Exec("ALTER TABLE flights ADD COLUMN starting_hole INTEGER DEFAULT 1")
 
 	// Populate holes if empty
 	var count int

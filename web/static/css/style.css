@@ -213,6 +213,20 @@ td {
     padding: 4px 0;
 }
 
+.starting-hole-row {
+    background-color: #1b4d3e;
+    /* Dark Forest Green */
+}
+
+.starting-hole-row .hole-number {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.starting-hole-row .hole-par {
+    color: rgba(255, 255, 255, 0.8);
+}
+
 .hole-info-cell {
     width: 50px;
     min-width: 50px;

@@ -9,9 +9,10 @@ type Player struct {
 }
 
 type Flight struct {
-	ID    int    `json:"id"`
-	Token string `json:"token"`
-	Name  string `json:"name"`
+	ID           int    `json:"id"`
+	Token        string `json:"token"`
+	Name         string `json:"name"`
+	StartingHole int    `json:"starting_hole"`
 }
 
 type FlightPlayer struct {

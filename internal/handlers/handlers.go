@@ -144,7 +144,7 @@ func FlightsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		// Get all flights with players
 		rows, err := db.DB.Query(`
-			SELECT f.id, f.token, f.name, p.id, p.name, p.surname, p.reg_num, p.handicap
+			SELECT f.id, f.token, f.name, f.starting_hole, p.id, p.name, p.surname, p.reg_num, p.handicap
 			FROM flights f
 			LEFT JOIN flight_players fp ON f.id = fp.flight_id
 			LEFT JOIN players p ON fp.player_id = p.id
@@ -156,35 +156,38 @@ func FlightsHandler(w http.ResponseWriter, r *http.Request) {
 		defer rows.Close()
 
 		flightMap := make(map[int]*struct {
-			ID      int             `json:"id"`
-			Token   string          `json:"token"`
-			Name    string          `json:"name"`
-			Players []models.Player `json:"players"`
+			ID           int             `json:"id"`
+			Token        string          `json:"token"`
+			Name         string          `json:"name"`
+			StartingHole int             `json:"starting_hole"`
+			Players      []models.Player `json:"players"`
 		})
 
 		for rows.Next() {
-			var fID int
+			var fID, fStartingHole int
 			var fToken, fName string
 			var pID sql.NullInt64
 			var pName, pSurname, pRegNum sql.NullString
 			var pHandicap sql.NullFloat64
 
-			if err := rows.Scan(&fID, &fToken, &fName, &pID, &pName, &pSurname, &pRegNum, &pHandicap); err != nil {
+			if err := rows.Scan(&fID, &fToken, &fName, &fStartingHole, &pID, &pName, &pSurname, &pRegNum, &pHandicap); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 			if _, ok := flightMap[fID]; !ok {
 				flightMap[fID] = &struct {
-					ID      int             `json:"id"`
-					Token   string          `json:"token"`
-					Name    string          `json:"name"`
-					Players []models.Player `json:"players"`
+					ID           int             `json:"id"`
+					Token        string          `json:"token"`
+					Name         string          `json:"name"`
+					StartingHole int             `json:"starting_hole"`
+					Players      []models.Player `json:"players"`
 				}{
-					ID:      fID,
-					Token:   fToken,
-					Name:    fName,
-					Players: []models.Player{},
+					ID:           fID,
+					Token:        fToken,
+					Name:         fName,
+					StartingHole: fStartingHole,
+					Players:      []models.Player{},
 				}
 			}
 
@@ -214,24 +217,29 @@ func FlightsHandler(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == http.MethodPost {
 		// Create new flight
 		var req struct {
-			Name string `json:"name"`
+			Name         string `json:"name"`
+			StartingHole int    `json:"starting_hole"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
+		if req.StartingHole == 0 {
+			req.StartingHole = 1
+		}
+
 		// Generate a hash token
 		hash := sha256.Sum256([]byte(req.Name + time.Now().String()))
 		token := hex.EncodeToString(hash[:])[:16] // Take first 16 chars
 
-		res, err := db.DB.Exec("INSERT INTO flights (token, name) VALUES (?, ?)", token, req.Name)
+		res, err := db.DB.Exec("INSERT INTO flights (token, name, starting_hole) VALUES (?, ?, ?)", token, req.Name, req.StartingHole)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		id, _ := res.LastInsertId()
-		json.NewEncoder(w).Encode(map[string]interface{}{"id": id, "token": token})
+		json.NewEncoder(w).Encode(map[string]interface{}{"id": id, "token": token, "starting_hole": req.StartingHole})
 	} else if r.Method == http.MethodDelete {
 		// Delete flight
 		var req struct {
@@ -271,6 +279,29 @@ func FlightsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusOK)
 	}
+}
+
+func UpdateFlightHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		ID           int    `json:"id"`
+		Name         string `json:"name"`
+		StartingHole int    `json:"starting_hole"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, err := db.DB.Exec("UPDATE flights SET name = ?, starting_hole = ? WHERE id = ?", req.Name, req.StartingHole, req.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func AssignPlayerHandler(w http.ResponseWriter, r *http.Request) {

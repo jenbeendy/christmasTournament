@@ -29,6 +29,7 @@ func main() {
 	http.HandleFunc("/api/players/import", handlers.ImportPlayersHandler)    // POST
 	http.HandleFunc("/api/players/delete", handlers.DeletePlayerHandler)     // POST
 	http.HandleFunc("/api/flights", handlers.FlightsHandler)                 // GET, POST (create)
+	http.HandleFunc("/api/flights/update", handlers.UpdateFlightHandler)     // POST
 	http.HandleFunc("/api/flights/assign", handlers.AssignPlayerHandler)     // POST (assign)
 	http.HandleFunc("/api/flights/unassign", handlers.UnassignPlayerHandler) // POST (unassign)
 	http.HandleFunc("/api/scores", handlers.ScoresHandler)                   // POST (submit)

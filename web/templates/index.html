@@ -75,28 +75,38 @@
                 <!-- Flights Tab -->
                 <div v-if="adminTab === 'flights'">
                     <h2>Flights</h2>
-                    <div class="create-flight">
+                    <div class="create-flight" style="margin-bottom: 20px;">
                         <input v-model="newFlightName" placeholder="Flight Name">
-                        <button @click="createFlight">Create Flight</button>
+                        <label style="margin-left: 10px;">Starting Hole: </label>
+                        <select v-model="newFlightStartingHole">
+                            <option v-for="h in 18" :key="h" :value="h">{{ h }}</option>
+                        </select>
+                        <button @click="createFlight" style="margin-left: 10px;">Create Flight</button>
                     </div>
 
                     <div class="flights-container">
                         <div class="flight-column">
-                            <h3>Unassigned Players</h3>
+                            <h3>Unassigned</h3>
                             <div id="unassigned-players" class="player-list">
                                 <div v-for="player in unassignedPlayers" :key="player.id" :data-id="player.id"
                                     class="player-card">
-                                    {{ player.name }} {{ player.surname }} ({{ player.handicap }})
+                                    {{ player.name }} {{ player.surname }}
                                 </div>
                             </div>
                         </div>
 
                         <div class="flight-column" v-for="flight in flights" :key="flight.id">
                             <h3>
-                                {{ flight.name }} <small>({{ flight.token }})</small>
+                                <input v-model="flight.name" @change="updateFlight(flight)"
+                                    style="width: 100px; font-weight: bold; border: none; background: transparent;">
+                                <select v-model="flight.starting_hole" @change="updateFlight(flight)"
+                                    style="font-size: 0.8em; margin-left: 5px;">
+                                    <option v-for="h in 18" :key="h" :value="h">Hole {{ h }}</option>
+                                </select>
                                 <button @click="deleteFlight(flight.id)"
-                                    style="float: right; font-size: 0.8em; color: red;">X</button>
+                                    style="float: right; font-size: 0.8em; color: red; border: none; background: transparent; cursor: pointer;">✕</button>
                             </h3>
+                            <p style="font-size: 0.8em; color: #666; margin-top: -5px;">Token: {{ flight.token }}</p>
                             <p><a :href="'/?view=scoring&token=' + flight.token" target="_blank">Scoring Link</a></p>
                             <div :id="'flight-' + flight.id" class="player-list flight-list"
                                 :data-flight-id="flight.id">
@@ -193,7 +203,8 @@
                     <!-- Scoring Grid -->
                     <div class="scoring-grid">
                         <!-- Holes 1-9 -->
-                        <div v-for="hole in 9" :key="hole" class="hole-row">
+                        <div v-for="hole in 9" :key="hole" class="hole-row"
+                            :class="{ 'starting-hole-row': hole === currentFlight?.starting_hole }">
                             <div class="hole-info-cell">
                                 <div class="hole-number"># {{ hole }}</div>
                                 <div class="hole-par">PAR {{ getPar(hole) }}</div>
@@ -221,7 +232,8 @@
                         </div>
 
                         <!-- Holes 10-18 -->
-                        <div v-for="hole in 9" :key="hole + 9" class="hole-row">
+                        <div v-for="hole in 9" :key="hole + 9" class="hole-row"
+                            :class="{ 'starting-hole-row': (hole + 9) === currentFlight?.starting_hole }">
                             <div class="hole-info-cell">
                                 <div class="hole-number"># {{ hole + 9 }}</div>
                                 <div class="hole-par">PAR {{ getPar(hole + 9) }}</div>
@@ -288,6 +300,24 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warning Modal -->
+                <div v-if="showWarning" class="picker-modal" @click.self="closeWarning">
+                    <div class="picker-content"
+                        style="max-width: 320px; align-self: center; margin-bottom: 0; border-radius: 16px;">
+                        <div class="picker-header" style="justify-content: center;">
+                            <div class="picker-title">Upozornění</div>
+                        </div>
+                        <div
+                            style="padding: 24px; text-align: center; color: #333; line-height: 1.5; font-size: 0.95em;">
+                            {{ warningMessage }}
+                        </div>
+                        <div style="padding: 16px; border-top: 1px solid #eee; text-align: center;">
+                            <button @click="closeWarning"
+                                style="background: none; border: none; color: #007aff; font-size: 1.1em; font-weight: 600; cursor: pointer; width: 100%;">Rozumím</button>
                         </div>
                     </div>
                 </div>

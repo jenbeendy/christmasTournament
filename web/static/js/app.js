@@ -9,9 +9,12 @@ createApp({
         const results = ref([]);
         const course = ref([]);
         const newFlightName = ref('');
+        const newFlightStartingHole = ref(1);
         const flightToken = ref('');
         const currentFlight = ref(null);
         const scores = ref({}); // Map of playerID -> hole -> strokes
+        const showWarning = ref(false);
+        const warningMessage = ref('');
 
         // Player Form State
         const playerForm = ref({ id: 0, name: '', surname: '', reg_num: '', handicap: 0 });
@@ -119,9 +122,27 @@ createApp({
             await fetch('/api/flights', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newFlightName.value })
+                body: JSON.stringify({
+                    name: newFlightName.value,
+                    starting_hole: newFlightStartingHole.value
+                })
             });
             newFlightName.value = '';
+            newFlightStartingHole.value = 1;
+            fetchFlights();
+        };
+
+        // Update Flight (Name or Starting Hole)
+        const updateFlight = async (flight) => {
+            await fetch('/api/flights/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: flight.id,
+                    name: flight.name,
+                    starting_hole: flight.starting_hole
+                })
+            });
             fetchFlights();
         };
 
@@ -297,6 +318,18 @@ createApp({
         };
 
         const openPicker = (hole) => {
+            const startHole = currentFlight.value.starting_hole || 1;
+
+            // If this is NOT the starting hole, check if starting hole has at least one score
+            if (hole !== startHole) {
+                const hasStartScore = currentFlight.value.players.some(p => getScore(p.id, startHole) !== '');
+                if (!hasStartScore) {
+                    warningMessage.value = `Omlouváme se, dokud není zapsán výsledek na vaší startovní jamce (č. ${startHole}), nelze zapisovat na ostatní jamky.`;
+                    showWarning.value = true;
+                    return;
+                }
+            }
+
             pickerHole.value = hole;
             const par = getPar(hole);
 
@@ -376,6 +409,10 @@ createApp({
             return total;
         };
 
+        const closeWarning = () => {
+            showWarning.value = false;
+        };
+
         const closePicker = () => {
             showPicker.value = false;
         };
@@ -389,6 +426,7 @@ createApp({
             course,
             saveCourse,
             newFlightName,
+            newFlightStartingHole,
             flightToken,
             currentFlight,
             unassignedPlayers,
@@ -401,12 +439,15 @@ createApp({
             uploadCourse,
             deletePlayer,
             createFlight,
+            updateFlight,
             deleteFlight,
             loadFlight,
             getScore,
             submitScore,
             getInitials,
             showPicker,
+            showWarning,
+            warningMessage,
             pickerValues,
             pickerHole,
             setPickerRef,
@@ -414,6 +455,7 @@ createApp({
             scrollToPlayerValue,
             onPlayerScroll,
             confirmScore,
+            closeWarning,
             closePicker,
             getDistance,
             getPar,
