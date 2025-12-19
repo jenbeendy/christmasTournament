@@ -473,6 +473,8 @@ td {
 .picker-list {
     height: 100%;
     overflow-y: scroll;
+    overflow-x: hidden;
+    touch-action: pan-y;
     scroll-snap-type: y mandatory;
     padding-top: 80px;
     padding-bottom: 120px;
