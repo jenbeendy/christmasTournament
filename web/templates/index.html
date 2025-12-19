@@ -13,8 +13,11 @@
 
 <body>
     <div id="app">
-        <header v-if="view !== 'landing'" style="text-align: center; background: white; border-bottom: 1px solid #eee;">
-            <h1 style="margin: 0; padding: 20px 0;">Vánoční turnaj</h1>
+        <header v-if="view !== 'landing'" style="background: white; border-bottom: 1px solid #eee;">
+            <div class="header-content">
+                <img src="/static/img/logo_black.png" alt="Logo" class="header-logo">
+                <h1 style="margin: 0; padding: 20px 0;">Vánoční turnaj</h1>
+            </div>
             <nav v-if="view === 'admin'">
                 <button @click="adminTab = 'players'" :class="{active: adminTab === 'players'}">Hráči</button>
                 <button @click="adminTab = 'flights'" :class="{active: adminTab === 'flights'}">Flighty</button>
