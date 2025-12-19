@@ -53,6 +53,12 @@
                         <hr>
                         <label>Import CSV: </label>
                         <input type="file" @change="uploadPlayers" accept=".csv">
+                        <div style="margin-top: 15px;">
+                            <button @click="fetchHCPs" :disabled="isFetchingHCP"
+                                style="background: #1b4d3e; color: white;">Fetch missing HCPs</button>
+                            <span v-if="isFetchingHCP" style="margin-left: 10px; font-style: italic;">Fetching
+                                handicaps... this may take a while.</span>
+                        </div>
                     </div>
                     <table>
                         <thead>

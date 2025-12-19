@@ -19,6 +19,7 @@ createApp({
         // Player Form State
         const playerForm = ref({ id: 0, name: '', surname: '', reg_num: '', handicap: 0, gender: 'M' });
         const isEditing = ref(false);
+        const isFetchingHCP = ref(false);
 
         // Fetch Players
         const fetchPlayers = async () => {
@@ -103,6 +104,18 @@ createApp({
         const cancelEdit = () => {
             playerForm.value = { id: 0, name: '', surname: '', reg_num: '', handicap: 0, gender: 'M' };
             isEditing.value = false;
+        };
+
+        const fetchHCPs = async () => {
+            isFetchingHCP.value = true;
+            try {
+                await fetch('/api/players/fetch-hcp', { method: 'POST' });
+                await fetchPlayers();
+            } catch (e) {
+                console.error(e);
+            } finally {
+                isFetchingHCP.value = false;
+            }
         };
 
         // Delete Player
@@ -517,7 +530,9 @@ createApp({
             getScoreStyle,
             isHoleScored,
             downloadQR,
-            downloadAllQRs
+            downloadAllQRs,
+            isFetchingHCP,
+            fetchHCPs
         };
     }
 }).mount('#app');

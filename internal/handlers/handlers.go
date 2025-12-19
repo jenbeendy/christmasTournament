@@ -6,11 +6,16 @@ import (
 	"encoding/csv"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/antigravity/christmasTournament/internal/db"
 	"github.com/antigravity/christmasTournament/internal/models"
 )
@@ -650,4 +655,115 @@ func ExportCourseHandler(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	writer.Flush()
+}
+func FetchHCPHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// 1. Find players with handicap = 0 (or not set)
+	rows, err := db.DB.Query("SELECT id, name, surname, reg_num FROM players WHERE (handicap = 0 OR handicap IS NULL) AND reg_num != ''")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var playersToFetch []models.Player
+	for rows.Next() {
+		var p models.Player
+		if err := rows.Scan(&p.ID, &p.Name, &p.Surname, &p.RegNum); err != nil {
+			continue
+		}
+		playersToFetch = append(playersToFetch, p)
+	}
+
+	if len(playersToFetch) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	for _, p := range playersToFetch {
+		hcp, err := fetchSingleHCP(client, p.RegNum, p.Surname)
+		if err == nil && hcp > 0 {
+			_, _ = db.DB.Exec("UPDATE players SET handicap = ? WHERE id = ?", hcp, p.ID)
+		}
+		// Delay between players
+		time.Sleep(1 * time.Second)
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func fetchSingleHCP(client *http.Client, regNum, surname string) (float64, error) {
+	targetURL := "https://server.cgf.cz/HcpCheck.aspx"
+	captchaCode := "z999d"
+
+	for i := 0; i < 5; i++ { // Try up to 5 times
+		// Step 1: GET to get session and viewstate
+		resp, err := client.Get(targetURL)
+		if err != nil {
+			return 0, err
+		}
+
+		doc, err := goquery.NewDocumentFromReader(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			return 0, err
+		}
+
+		viewState, _ := doc.Find("#__VIEWSTATE").Attr("value")
+		eventValidation, _ := doc.Find("#__EVENTVALIDATION").Attr("value")
+		viewStateGen, _ := doc.Find("#__VIEWSTATEGENERATOR").Attr("value")
+
+		// Step 2: POST with data
+		data := url.Values{}
+		data.Set("__VIEWSTATE", viewState)
+		data.Set("__EVENTVALIDATION", eventValidation)
+		data.Set("__VIEWSTATEGENERATOR", viewStateGen)
+		data.Set("tbMemberNumber", regNum)
+		data.Set("tbSurname", surname)
+		data.Set("tbCaptcha", captchaCode)
+		data.Set("btnCheck", "Ověřit")
+
+		req, _ := http.NewRequest("POST", targetURL, strings.NewReader(data.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		resp, err = client.Do(req)
+		if err != nil {
+			return 0, err
+		}
+
+		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		bodyStr := string(body)
+
+		// Check if it's the result page or still the form
+		if strings.Contains(bodyStr, "Aktuální hendikepový index") {
+			// Parsing step
+			doc, _ := goquery.NewDocumentFromReader(strings.NewReader(bodyStr))
+			hcpStr := ""
+			doc.Find("table tr").Each(func(i int, s *goquery.Selection) {
+				if strings.Contains(s.Text(), "Aktuální hendikepový index") {
+					hcpStr = s.Find("strong").First().Text()
+				}
+			})
+
+			hcpStr = strings.TrimSpace(hcpStr)
+			hcpStr = strings.Replace(hcpStr, ",", ".", -1) // Convert 9,4 to 9.4
+			if hcp, err := strconv.ParseFloat(hcpStr, 64); err == nil {
+				return hcp, nil
+			}
+		}
+
+		// Wait 300ms before retry
+		time.Sleep(300 * time.Millisecond)
+	}
+
+	return 0, fmt.Errorf("failed after retries")
 }
