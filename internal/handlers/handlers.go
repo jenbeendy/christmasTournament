@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"sort"
@@ -680,23 +681,31 @@ func FetchHCPHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(playersToFetch) == 0 {
+		log.Println("No players to fetch HCP for")
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+
+	log.Printf("Starting HCP fetch for %d players", len(playersToFetch))
 
 	client := &http.Client{
 		Timeout: 30 * time.Second,
 	}
 
-	for _, p := range playersToFetch {
+	for i, p := range playersToFetch {
+		log.Printf("[%d/%d] Fetching HCP for %s %s (%s)...", i+1, len(playersToFetch), p.Name, p.Surname, p.RegNum)
 		hcp, err := fetchSingleHCP(client, p.RegNum, p.Surname)
 		if err == nil && hcp > 0 {
+			log.Printf("Successfully fetched HCP %.1f for %s %s", hcp, p.Name, p.Surname)
 			_, _ = db.DB.Exec("UPDATE players SET handicap = ? WHERE id = ?", hcp, p.ID)
+		} else {
+			log.Printf("Failed to fetch HCP for %s %s: %v", p.Name, p.Surname, err)
 		}
 		// Delay between players
 		time.Sleep(1 * time.Second)
 	}
 
+	log.Println("HCP fetch process completed")
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -705,6 +714,9 @@ func fetchSingleHCP(client *http.Client, regNum, surname string) (float64, error
 	captchaCode := "z999d"
 
 	for i := 0; i < 5; i++ { // Try up to 5 times
+		if i > 0 {
+			log.Printf("  - Retry %d/4 for captcha...", i)
+		}
 		// Step 1: GET to get session and viewstate
 		resp, err := client.Get(targetURL)
 		if err != nil {
