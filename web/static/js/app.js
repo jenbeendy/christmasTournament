@@ -360,6 +360,8 @@ createApp({
 
             if (path === '/adminpage') {
                 view.value = 'admin';
+            } else if (path === '/flights') {
+                view.value = 'flights';
             } else if (tokenParam) {
                 view.value = 'scoring';
                 flightToken.value = tokenParam;
@@ -372,6 +374,11 @@ createApp({
         // Helper: Get Initials
         const getInitials = (name, surname) => {
             return (name.charAt(0) + surname.charAt(0)).toUpperCase();
+        };
+
+        const capitalize = (str) => {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
         };
 
         // Multi-Picker State
@@ -538,7 +545,8 @@ createApp({
             downloadAllQRs,
             randomAssign,
             isFetchingHCP,
-            fetchHCPs
+            fetchHCPs,
+            capitalize
         };
     }
 }).mount('#app');

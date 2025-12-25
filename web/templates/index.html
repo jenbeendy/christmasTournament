@@ -222,6 +222,26 @@
                 </div>
             </div>
 
+            <!-- Flights Info View -->
+            <div v-if="view === 'flights'" class="admin-panel">
+                <h2 style="text-align: center; margin-bottom: 30px;">Rozdělení do flightů</h2>
+                <div class="flights-container">
+                    <div class="flight-column" v-for="flight in flights" :key="flight.id">
+                        <h3>
+                            {{ flight.name }}
+                            <span style="font-size: 0.8em; margin-left: 10px; color: #1b4d3e;">(Jamka {{
+                                flight.starting_hole }})</span>
+                        </h3>
+                        <div class="player-list flight-list" style="border: none;">
+                            <div v-for="player in flight.players" :key="player.id" class="player-card"
+                                style="cursor: default;">
+                                {{ capitalize(player.surname) }} {{ capitalize(player.name) }} {{ player.handicap }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Scoring View -->
             <div v-if="view === 'scoring'" class="scoring-panel">
                 <div v-if="!currentFlight" class="flight-entry">
