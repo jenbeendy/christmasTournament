@@ -25,19 +25,20 @@ func main() {
 	http.Handle("/static/", noCache(http.StripPrefix("/static/", fs)))
 
 	// API Endpoints
-	http.HandleFunc("/api/players", handlers.PlayersHandler)                 // GET, POST
-	http.HandleFunc("/api/players/import", handlers.ImportPlayersHandler)    // POST
-	http.HandleFunc("/api/players/delete", handlers.DeletePlayerHandler)     // POST
-	http.HandleFunc("/api/flights", handlers.FlightsHandler)                 // GET, POST (create)
-	http.HandleFunc("/api/flights/update", handlers.UpdateFlightHandler)     // POST
-	http.HandleFunc("/api/flights/assign", handlers.AssignPlayerHandler)     // POST (assign)
-	http.HandleFunc("/api/flights/unassign", handlers.UnassignPlayerHandler) // POST (unassign)
-	http.HandleFunc("/api/scores", handlers.ScoresHandler)                   // POST (submit)
-	http.HandleFunc("/api/results", handlers.ResultsHandler)                 // GET
-	http.HandleFunc("/api/course", handlers.CourseHandler)                   // GET, POST
-	http.HandleFunc("/api/course/import", handlers.ImportCourseHandler)      // POST
-	http.HandleFunc("/api/course/export", handlers.ExportCourseHandler)      // GET
-	http.HandleFunc("/api/players/fetch-hcp", handlers.FetchHCPHandler)      // POST
+	http.HandleFunc("/api/players", handlers.PlayersHandler)                    // GET, POST
+	http.HandleFunc("/api/players/import", handlers.ImportPlayersHandler)       // POST
+	http.HandleFunc("/api/players/delete", handlers.DeletePlayerHandler)        // POST
+	http.HandleFunc("/api/flights", handlers.FlightsHandler)                    // GET, POST (create)
+	http.HandleFunc("/api/flights/update", handlers.UpdateFlightHandler)        // POST
+	http.HandleFunc("/api/flights/assign", handlers.AssignPlayerHandler)        // POST (assign)
+	http.HandleFunc("/api/flights/unassign", handlers.UnassignPlayerHandler)    // POST (unassign)
+	http.HandleFunc("/api/flights/random-assign", handlers.RandomAssignHandler) // POST
+	http.HandleFunc("/api/scores", handlers.ScoresHandler)                      // POST (submit)
+	http.HandleFunc("/api/results", handlers.ResultsHandler)                    // GET
+	http.HandleFunc("/api/course", handlers.CourseHandler)                      // GET, POST
+	http.HandleFunc("/api/course/import", handlers.ImportCourseHandler)         // POST
+	http.HandleFunc("/api/course/export", handlers.ExportCourseHandler)         // GET
+	http.HandleFunc("/api/players/fetch-hcp", handlers.FetchHCPHandler)         // POST
 
 	// Admin Pages
 	http.HandleFunc("/adminpage", func(w http.ResponseWriter, r *http.Request) {

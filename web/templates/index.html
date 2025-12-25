@@ -102,6 +102,9 @@
                             <option v-for="h in 18" :key="h" :value="h">{{ h }}</option>
                         </select>
                         <button @click="createFlight" style="margin-left: 10px;">Vytvořit flight</button>
+                        <button @click="randomAssign"
+                            style="margin-left: 20px; background-color: #fbc02d; color: black; border: none;">Náhodně
+                            přiřadit zbytek</button>
                     </div>
 
                     <div class="flights-container">

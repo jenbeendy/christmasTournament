@@ -159,6 +159,11 @@ createApp({
             fetchFlights();
         };
 
+        const randomAssign = async () => {
+            if (!confirm('Tato akce náhodně přiřadí všechny zbylé hráče do neobsazených míst ve flightech. Pokračovat?')) return;
+            await fetch('/api/flights/random-assign', { method: 'POST' });
+            fetchFlights();
+        };
         // Delete Flight
         const deleteFlight = async (id) => {
             // if (!confirm('Are you sure you want to delete this flight? Players will be unassigned.')) return;
@@ -531,6 +536,7 @@ createApp({
             isHoleScored,
             downloadQR,
             downloadAllQRs,
+            randomAssign,
             isFetchingHCP,
             fetchHCPs
         };

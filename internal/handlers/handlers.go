@@ -390,6 +390,98 @@ func UnassignPlayerHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func RandomAssignHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// 1. Get all unassigned players
+	rows, err := db.DB.Query(`
+		SELECT id FROM players 
+		WHERE id NOT IN (SELECT player_id FROM flight_players)
+	`)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var unassignedIds []int
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			continue
+		}
+		unassignedIds = append(unassignedIds, id)
+	}
+
+	if len(unassignedIds) == 0 {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// Shuffle unassigned IDs
+	for i := range unassignedIds {
+		j := (int(time.Now().UnixNano()) + i) % len(unassignedIds)
+		unassignedIds[i], unassignedIds[j] = unassignedIds[j], unassignedIds[i]
+	}
+
+	// 2. Get all flights and their current player counts
+	rows, err = db.DB.Query(`
+		SELECT f.id, COUNT(fp.player_id) as count 
+		FROM flights f 
+		LEFT JOIN flight_players fp ON f.id = fp.flight_id 
+		GROUP BY f.id
+	`)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	type flightInfo struct {
+		id    int
+		count int
+	}
+	var flights []flightInfo
+	for rows.Next() {
+		var f flightInfo
+		if err := rows.Scan(&f.id, &f.count); err != nil {
+			continue
+		}
+		flights = append(flights, f)
+	}
+
+	// 3. Assign players to flights (max 4 per flight)
+	tx, err := db.DB.Begin()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	playerIdx := 0
+	for _, f := range flights {
+		remainingSlots := 4 - f.count
+		for j := 0; j < remainingSlots && playerIdx < len(unassignedIds); j++ {
+			_, err = tx.Exec("INSERT INTO flight_players (flight_id, player_id) VALUES (?, ?)", f.id, unassignedIds[playerIdx])
+			if err != nil {
+				tx.Rollback()
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			playerIdx++
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func ScoresHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		playerIDStr := r.URL.Query().Get("player_id")
