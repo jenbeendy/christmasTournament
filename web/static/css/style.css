@@ -136,6 +136,7 @@ td {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
     padding-bottom: 20px;
+    align-items: start;
 }
 
 .flight-column {
@@ -149,6 +150,12 @@ td {
     min-height: 100px;
     border: 1px dashed #ccc;
     padding: 5px;
+}
+
+#unassigned-players {
+    max-height: 300px;
+    overflow-y: auto;
+    background: #f8f9fa;
 }
 
 .player-card {
