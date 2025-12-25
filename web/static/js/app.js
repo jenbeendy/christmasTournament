@@ -186,7 +186,9 @@ createApp({
                     }
                 });
             }
-            return players.value.filter(p => !assignedIds.has(p.id));
+            return players.value
+                .filter(p => !assignedIds.has(p.id))
+                .sort((a, b) => a.surname.localeCompare(b.surname, 'cs'));
         });
 
         // Drag and Drop Setup
