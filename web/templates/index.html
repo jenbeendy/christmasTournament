@@ -110,7 +110,7 @@
                             <div id="unassigned-players" class="player-list">
                                 <div v-for="player in unassignedPlayers" :key="player.id" :data-id="player.id"
                                     class="player-card">
-                                    {{ player.name }} {{ player.surname }}
+                                    {{ player.surname }} {{ player.name }}
                                 </div>
                             </div>
                         </div>
@@ -133,7 +133,7 @@
                                 :data-flight-id="flight.id">
                                 <div v-for="player in flight.players" :key="player.id" :data-id="player.id"
                                     class="player-card">
-                                    {{ player.name }} {{ player.surname }} ({{ player.handicap }})
+                                    {{ player.surname }} {{ player.name }} ({{ player.handicap }})
                                 </div>
                             </div>
                         </div>
@@ -155,7 +155,7 @@
                         <tbody>
                             <tr v-for="(r, index) in results" :key="r.id">
                                 <td>{{ index + 1 }}</td>
-                                <td>{{ r.name }} {{ r.surname }}</td>
+                                <td>{{ r.surname }} {{ r.name }}</td>
                                 <td>{{ r.gross }}</td>
                                 <td>{{ r.net.toFixed(1) }}</td>
                             </tr>
