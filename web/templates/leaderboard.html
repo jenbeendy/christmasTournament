@@ -218,9 +218,6 @@
                             <div class="initials-circle">{{ getInitials(r.name, r.surname) }}</div>
                             <div>
                                 <div style="font-weight: 600;">{{ r.name }} {{ r.surname }}</div>
-                                <span v-if="r.holes_played === 18" class="status-badge status-finished">Ukončeno</span>
-                                <span v-else-if="r.holes_played > 0" class="status-badge status-playing">Jamka {{
-                                    r.holes_played }}</span>
                             </div>
                         </div>
                     </td>
