@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaderboard - Christmas Tournament</title>
+    <title>Výsledková listina - Vánoční turnaj</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
@@ -193,21 +193,21 @@
     <div id="app" class="leaderboard-container">
         <div class="leaderboard-header">
             <div style="float: right; font-size: 0.8em; color: #666;">
-                <span class="live-indicator"></span>LIVE RESULTS
+                <span class="live-indicator"></span>ŽIVÉ VÝSLEDKY
             </div>
-            <h1>Christmas Tournament</h1>
-            <p>Leaderboard</p>
+            <h1>Vánoční turnaj</h1>
+            <p>Výsledková listina</p>
         </div>
 
         <table class="leaderboard-table">
             <thead>
                 <tr>
                     <th class="rank-cell">#</th>
-                    <th>Player</th>
-                    <th>Played</th>
-                    <th style="text-align: right;">Gross</th>
+                    <th>Hráč</th>
+                    <th>Odehráno</th>
+                    <th style="text-align: right;">Brutto</th>
                     <th style="text-align: right;">HCP</th>
-                    <th style="text-align: right;">NET</th>
+                    <th style="text-align: right;">Netto</th>
                 </tr>
             </thead>
             <transition-group name="list" tag="tbody">
@@ -218,8 +218,8 @@
                             <div class="initials-circle">{{ getInitials(r.name, r.surname) }}</div>
                             <div>
                                 <div style="font-weight: 600;">{{ r.name }} {{ r.surname }}</div>
-                                <span v-if="r.holes_played === 18" class="status-badge status-finished">Finished</span>
-                                <span v-else-if="r.holes_played > 0" class="status-badge status-playing">Hole {{
+                                <span v-if="r.holes_played === 18" class="status-badge status-finished">Ukončeno</span>
+                                <span v-else-if="r.holes_played > 0" class="status-badge status-playing">Jamka {{
                                     r.holes_played }}</span>
                             </div>
                         </div>
@@ -238,7 +238,7 @@
         </table>
 
         <div v-if="results.length === 0" class="empty-state">
-            No players recorded yet.
+            Zatím žádní hráči.
         </div>
     </div>
 
