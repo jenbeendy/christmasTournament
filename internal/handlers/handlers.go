@@ -128,6 +128,7 @@ func ImportPlayersHandler(w http.ResponseWriter, r *http.Request) {
 		name := record[0]
 		surname := record[1]
 		regNum := record[2]
+		handicap := record[3]
 		gender := "M" // Default
 		if len(record) > 3 {
 			g := strings.ToUpper(strings.TrimSpace(record[3]))
@@ -138,7 +139,7 @@ func ImportPlayersHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		_, err = db.DB.Exec("INSERT INTO players (name, surname, reg_num, handicap, gender) VALUES (?, ?, ?, ?, ?)", name, surname, regNum, 0.0, gender)
+		_, err = db.DB.Exec("INSERT INTO players (name, surname, reg_num, handicap, gender) VALUES (?, ?, ?, ?, ?)", name, surname, regNum, handicap, gender)
 		if err != nil {
 			continue
 		}
