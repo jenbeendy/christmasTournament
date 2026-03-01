@@ -15,6 +15,7 @@ createApp({
         const scores = ref({}); // Map of playerID -> hole -> strokes
         const showWarning = ref(false);
         const warningMessage = ref('');
+        const scoringEnabled = ref(true);
 
         // Player Form State
         const playerForm = ref({ id: 0, name: '', surname: '', reg_num: '', handicap: 0, gender: 'M' });
@@ -54,6 +55,24 @@ createApp({
         const fetchResults = async () => {
             const res = await fetch('/api/results');
             results.value = await res.json();
+        };
+
+        const fetchSettings = async () => {
+            const res = await fetch('/api/settings');
+            const data = await res.json();
+            if (data.scoring_enabled !== undefined) {
+                scoringEnabled.value = data.scoring_enabled === '1';
+            }
+        };
+
+        const updateSettings = async () => {
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    scoring_enabled: scoringEnabled.value ? '1' : '0'
+                })
+            });
         };
 
         // Upload Players
@@ -276,8 +295,10 @@ createApp({
         };
 
         const submitScore = async (playerId, hole, strokes) => {
+            if (!scoringEnabled.value) return;
+
             scores.value[`${playerId}-${hole}`] = strokes;
-            await fetch('/api/scores', {
+            const res = await fetch('/api/scores', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -286,6 +307,11 @@ createApp({
                     strokes: parseInt(strokes)
                 })
             });
+
+            if (res.status === 403) {
+                alert('Zapisování výsledků je ukončeno.');
+                location.reload();
+            }
         };
 
         // ... (inside setup)
@@ -355,6 +381,7 @@ createApp({
             fetchFlights();
             fetchResults();
             fetchCourse();
+            fetchSettings();
 
             const path = window.location.pathname;
             const urlParams = new URLSearchParams(window.location.search);
@@ -394,6 +421,12 @@ createApp({
         };
 
         const openPicker = (hole) => {
+            if (!scoringEnabled.value) {
+                warningMessage.value = "Zapisování výsledků je pro tento turnaj ukončeno.";
+                showWarning.value = true;
+                return;
+            }
+
             const startHole = currentFlight.value.starting_hole || 1;
 
             // If this is NOT the starting hole, check if starting hole has at least one score
@@ -548,7 +581,10 @@ createApp({
             randomAssign,
             isFetchingHCP,
             fetchHCPs,
-            capitalize
+            capitalize,
+            scoringEnabled,
+            fetchSettings,
+            updateSettings
         };
     }
 }).mount('#app');

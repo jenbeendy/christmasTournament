@@ -62,6 +62,11 @@ func createTables() {
 		length_red INTEGER DEFAULT 0
 	);`
 
+	createSettingsTable := `CREATE TABLE IF NOT EXISTS settings (
+		key TEXT PRIMARY KEY,
+		value TEXT
+	);`
+
 	_, err := DB.Exec(createPlayersTable)
 	if err != nil {
 		log.Fatal(err)
@@ -87,11 +92,23 @@ func createTables() {
 		log.Fatal(err)
 	}
 
+	_, err = DB.Exec(createSettingsTable)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Migrations: Add length if it doesn't exist
 	_, _ = DB.Exec("ALTER TABLE holes ADD COLUMN length_red INTEGER DEFAULT 0")
 	_, _ = DB.Exec("ALTER TABLE holes RENAME COLUMN length TO length_yellow")
 	_, _ = DB.Exec("ALTER TABLE flights ADD COLUMN starting_hole INTEGER DEFAULT 1")
 	_, _ = DB.Exec("ALTER TABLE players ADD COLUMN gender TEXT DEFAULT 'M'")
+
+	// Initialize settings if empty
+	var scoringEnabledExists int
+	DB.QueryRow("SELECT COUNT(*) FROM settings WHERE key = 'scoring_enabled'").Scan(&scoringEnabledExists)
+	if scoringEnabledExists == 0 {
+		DB.Exec("INSERT INTO settings (key, value) VALUES ('scoring_enabled', '1')")
+	}
 
 	// Populate holes if empty
 	var count int

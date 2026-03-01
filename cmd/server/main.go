@@ -39,6 +39,7 @@ func main() {
 	http.HandleFunc("/api/course/import", handlers.ImportCourseHandler)         // POST
 	http.HandleFunc("/api/course/export", handlers.ExportCourseHandler)         // GET
 	http.HandleFunc("/api/players/fetch-hcp", handlers.FetchHCPHandler)         // POST
+	http.HandleFunc("/api/settings", handlers.SettingsHandler)                  // GET, POST
 
 	// Admin Pages
 	http.HandleFunc("/adminpage", func(w http.ResponseWriter, r *http.Request) {

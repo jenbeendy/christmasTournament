@@ -38,6 +38,17 @@
 
             <!-- Admin View -->
             <div v-if="view === 'admin'" class="admin-panel">
+                <!-- Global Settings -->
+                <div class="admin-settings-bar">
+                    <div class="setting-item">
+                        <label class="switch-label">
+                            <input type="checkbox" v-model="scoringEnabled" @change="updateSettings">
+                            <span class="switch-slider"></span>
+                        </label>
+                        <span class="setting-text">Povolit zapisování výsledků</span>
+                    </div>
+                </div>
+
                 <!-- Players Tab -->
                 <div v-if="adminTab === 'players'">
                     <h2>Hráči</h2>
@@ -257,6 +268,11 @@
                     <button @click="loadFlight">Načíst flight</button>
                 </div>
                 <div v-else class="scoring-view">
+                    <!-- Scoring Disabled Warning -->
+                    <div v-if="!scoringEnabled" class="scoring-disabled-warning">
+                        Zapisování výsledků je pro tento turnaj ukončeno.
+                    </div>
+
                     <!-- Removed blue app-header -->
 
 

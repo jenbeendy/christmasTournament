@@ -511,6 +511,12 @@ func ScoresHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(scores)
 
 	} else if r.Method == http.MethodPost {
+		// Check if scoring is enabled
+		if !isScoringEnabled() {
+			http.Error(w, "Scoring is currently disabled", http.StatusForbidden)
+			return
+		}
+
 		var s models.Score
 		if err := json.NewDecoder(r.Body).Decode(&s); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -890,4 +896,48 @@ func fetchSingleHCP(client *http.Client, regNum, surname string) (float64, error
 	}
 
 	return 0, fmt.Errorf("failed after retries")
+}
+
+func SettingsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		rows, err := db.DB.Query("SELECT key, value FROM settings")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		settings := make(map[string]string)
+		for rows.Next() {
+			var key, value string
+			if err := rows.Scan(&key, &value); err == nil {
+				settings[key] = value
+			}
+		}
+		json.NewEncoder(w).Encode(settings)
+	} else if r.Method == http.MethodPost {
+		var req map[string]string
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		for k, v := range req {
+			_, err := db.DB.Exec("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value", k, v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func isScoringEnabled() bool {
+	var val string
+	err := db.DB.QueryRow("SELECT value FROM settings WHERE key = 'scoring_enabled'").Scan(&val)
+	if err != nil {
+		return true // Default to enabled if error or not found
+	}
+	return val == "1"
 }
