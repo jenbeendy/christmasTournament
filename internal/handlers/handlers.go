@@ -545,7 +545,7 @@ func ScoresHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ResultsHandler(w http.ResponseWriter, r *http.Request) {
-	// Calculate total scores
+	// 1. Fetch total scores and basic player info
 	rows, err := db.DB.Query(`
 		SELECT p.id, p.name, p.surname, p.handicap, COALESCE(SUM(s.strokes), 0) as total_strokes, COUNT(s.id) as holes_played
 		FROM players p
@@ -559,6 +559,8 @@ func ResultsHandler(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	var results []map[string]interface{}
+	playerMap := make(map[int]map[string]interface{})
+
 	for rows.Next() {
 		var pID int
 		var pName, pSurname string
@@ -570,7 +572,7 @@ func ResultsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		netScore := float64(totalStrokes) - pHandicap
-		results = append(results, map[string]interface{}{
+		res := map[string]interface{}{
 			"id":           pID,
 			"name":         pName,
 			"surname":      pSurname,
@@ -578,12 +580,28 @@ func ResultsHandler(w http.ResponseWriter, r *http.Request) {
 			"gross":        totalStrokes,
 			"net":          netScore,
 			"holes_played": holesPlayed,
-		})
+			"scores":       make(map[int]int),
+		}
+		playerMap[pID] = res
+		results = append(results, res)
+	}
+
+	// 2. Fetch all individual scores
+	scoreRows, err := db.DB.Query("SELECT player_id, hole_number, strokes FROM scores")
+	if err == nil {
+		defer scoreRows.Close()
+		for scoreRows.Next() {
+			var pID, hole, strokes int
+			if err := scoreRows.Scan(&pID, &hole, &strokes); err == nil {
+				if p, ok := playerMap[pID]; ok {
+					p["scores"].(map[int]int)[hole] = strokes
+				}
+			}
+		}
 	}
 
 	// Sort by Net score
 	sort.Slice(results, func(i, j int) bool {
-		// If gross is 0, they haven't started or have 0 strokes.
 		// Put players with 0 holes at the bottom
 		if results[i]["holes_played"].(int) == 0 && results[j]["holes_played"].(int) > 0 {
 			return false

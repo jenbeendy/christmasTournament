@@ -131,6 +131,46 @@ td {
     text-align: left;
 }
 
+/* Results Table Styles */
+.results-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.results-table {
+    min-width: 1000px;
+    /* Ensure scrollability on smaller screens */
+    table-layout: auto;
+}
+
+.results-table th,
+.results-table td {
+    padding: 6px 8px;
+    font-size: 0.9em;
+}
+
+.player-name-cell {
+    min-width: 150px;
+    font-weight: 500;
+}
+
+.hole-col {
+    text-align: center;
+    width: 30px;
+    background: #f8f9fa;
+}
+
+.hole-score-cell {
+    text-align: center;
+    width: 30px;
+    height: 30px;
+    font-weight: bold;
+    color: #000;
+}
+
 .flights-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
