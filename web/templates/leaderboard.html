@@ -192,7 +192,7 @@
 <body>
     <div id="app" class="leaderboard-container">
         <div class="leaderboard-header">
-            <div style="float: right; font-size: 0.8em; color: #666;">
+            <div v-if="scoringEnabled" style="float: right; font-size: 0.8em; color: #666;">
                 <span class="live-indicator"></span>ŽIVÉ VÝSLEDKY
             </div>
             <div class="header-content" style="justify-content: center; gap: 20px;">
@@ -250,6 +250,7 @@
         createApp({
             setup() {
                 const results = ref([]);
+                const scoringEnabled = ref(true);
 
                 const fetchResults = async () => {
                     try {
@@ -260,19 +261,36 @@
                     }
                 };
 
+                const fetchSettings = async () => {
+                    try {
+                        const res = await fetch('/api/settings');
+                        const data = await res.json();
+                        if (data.scoring_enabled !== undefined) {
+                            scoringEnabled.value = data.scoring_enabled === '1';
+                        }
+                    } catch (e) {
+                        console.error("Failed to fetch settings", e);
+                    }
+                };
+
                 const getInitials = (name, surname) => {
                     return (name.charAt(0) + surname.charAt(0)).toUpperCase();
                 };
 
                 onMounted(() => {
                     fetchResults();
+                    fetchSettings();
                     // Update every second
-                    setInterval(fetchResults, 1000);
+                    setInterval(() => {
+                        fetchResults();
+                        fetchSettings();
+                    }, 1000);
                 });
 
                 return {
                     results,
-                    getInitials
+                    getInitials,
+                    scoringEnabled
                 };
             }
         }).mount('#app');
